@@ -10,7 +10,7 @@ url: "https://monster1365.github.io/" # the base hostname & protocol for your si
 
 # SEO PLUGIN
 social:
-  name: Your Name
+  name: SeoHyun Han
   links:
     - https://www.linkedin.com/in/BenBalter
     - https://github.com/Monster1365
@@ -22,7 +22,7 @@ navigation: # Navigation links
   - { name: "Contact", link: "/contact" }
 
 tagline: >
-  Modern Jekyll theme focused on speed performance &amp; SEO best practices
+  Documenting what I learn, build, and discover through hands-on development.
 
 hero_img: posts/sleek_lg.jpg # Main background image: use the path from /assets/img/ => This will output /assets/img/posts/sleek_lg.jpg
 
