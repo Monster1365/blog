@@ -69,37 +69,58 @@ categories: [Renpy, Game, Python]
 
 ## 할 일
 
+> 블로그를 **Next.js + Vercel + Neon PostgreSQL**로 옮기는 중입니다. 작업은 `develop` 브랜치에서 진행하고, 전환이 끝나면 `master`에 합칩니다.
+
 ### 사이트 기본 정리
 - [x] 테마 샘플 글 삭제
 - [x] `_config.yml`의 description, 원작자 LinkedIn 링크 정리
 - [x] 홈 페이지 제목(`index.md`) 수정
 - [x] README 다시 쓰기
-- [ ] 블로그 이름 정하기 (`_config.yml`의 `title`)
-- [ ] 본인 LinkedIn 링크 추가 (`social.links`)
-- [ ] `_includes/head.html`의 `apple-mobile-web-app-title`("Sleek") 변경
+- [ ] 블로그 이름 정하기
+- [ ] 본인 LinkedIn 링크 추가
 
-### Contact (Resend로 다시 구현)
-- [ ] 메일 발송용 서버리스 함수 만들기 (GitHub Pages는 정적 호스팅이라 Resend API 키를 숨길 서버 쪽 코드가 필요)
+### 1. Next.js 골격
+- [ ] Next.js 프로젝트 생성 (App Router, TypeScript)
+- [ ] 페이지 구성: 홈(글 목록·페이지네이션), 글 상세(`/[slug]`), 카테고리, About, Contact
+
+### 2. 디자인 이식
+- [ ] `_sass/` 구조(abstracts / base / components / layout / pages)를 Next.js의 Sass로 옮기기
+- [ ] `_layouts/`, `_includes/`(header, footer, card, pagination)를 React 컴포넌트로 바꾸기
+- [ ] 메인 배경 이미지와 Ren'Py 글 대표 이미지를 직접 고른 이미지로 교체
+- [ ] 파비콘과 아이콘 교체
+
+### 3. Neon DB
+- [ ] Neon 프로젝트 생성, 개발용 브랜치 분리
+- [ ] Drizzle ORM + `@neondatabase/serverless` 설정
+- [ ] `posts` 테이블 만들기: `id`, `slug`(unique), `title`, `content`(markdown), `excerpt`, `featured_img`, `categories`(text[]), `published`, `published_at`, `created_at`, `updated_at`
+
+### 4. 글 이관
+- [ ] `_posts/*.md`의 front matter를 읽어 `posts` 테이블에 넣는 스크립트 작성 (gray-matter)
+- [ ] 기존 글 이관 (현재 Ren'Py 글 1개)
+
+### 5. 렌더링
+- [ ] 마크다운을 HTML로 변환 (remark/rehype), 코드 하이라이팅 (shiki)
+- [ ] 글 상세 페이지에 ISR(revalidate) 적용
+- [ ] 대표 이미지를 `public/`이나 Vercel Blob에 두고 `next/image`로 표시
+
+### 6. Contact (Resend)
 - [ ] Resend 가입, API 키 발급, 발신 도메인 인증
-- [ ] API 키를 서버리스 함수의 환경 변수로 등록
-- [ ] `_includes/form.html`을 새 엔드포인트로 보내도록 수정 (fetch로 비동기 전송)
-- [ ] 스팸 방지 추가 (허니팟 필드, 허용 Origin 제한, 요청 횟수 제한 등)
-- [ ] 페이지 HTML에서 이메일 주소 노출 제거
-- [ ] `contact.md` 본문을 테마 설명 대신 직접 작성
-- [ ] 기존 Formspree 관련 코드와 문구 제거
+- [ ] `/api/contact` Route Handler에서 Resend로 메일 발송
+- [ ] 스팸 방지 (허니팟 필드, Origin 검사, 요청 횟수 제한)
+- [ ] 페이지에 이메일 주소가 노출되지 않게 하기
+- [ ] Contact 페이지 본문 직접 작성
 
-### 디자인
-- [ ] 메인 배경 이미지(`hero_img`) 교체
-- [ ] Ren'Py 글 대표 이미지(`featured-img`) 교체
-- [ ] 파비콘과 아이콘(`assets/img/icons/`) 교체
-- [ ] 쓰지 않는 테마 샘플 이미지 삭제 (`shane-rounce-*`, `emile-perron-*`, `sleek*`, 루트의 `sleek.jpg`)
+### 7. 배포 (Vercel)
+- [ ] Vercel 프로젝트를 GitHub 저장소와 연결
+- [ ] 환경 변수 `DATABASE_URL`, `RESEND_API_KEY`를 Preview와 Production에 등록
+- [ ] `develop`은 Preview, `master`는 Production으로 배포
 
-### 개발 환경과 배포
-- [ ] `bundle install`로 로컬 Jekyll 실행 환경 만들기
-- [ ] npm 의존성 업그레이드 또는 호환되는 Node 버전 고정
-- [ ] 서비스 워커 정리 (캐시 경로에 `/blog`가 빠져 있음. 고치거나 `service_worker: false`로 끄기)
-- [ ] 사용하지 않는 `.travis.yml` 삭제
-- [ ] Disqus shortname(`Monster1365`) 실제 등록 여부 확인
+### 8. 전환 마무리
+- [ ] Jekyll 관련 파일 삭제 (`_config.yml`, `_layouts/`, `_includes/`, `Gemfile`, gemspec, Gulp 설정, `sw.js`, `.travis.yml`, 테마 샘플 이미지 등)
+- [ ] GitHub Pages 끄기
+- [ ] 주소 변경 안내 (`monster1365.github.io/blog` → Vercel 도메인)
+- [ ] Disqus 댓글을 계속 쓸지 결정
+- [ ] DB로 옮긴 뒤 글 쓰는 방식 정하기 (관리자 페이지, 마크다운 업로드 스크립트 등)
 
 ### 글쓰기
 - [ ] Ren'Py 시리즈 이어 쓰기 (충돌 검사, 카메라 구조 등)
