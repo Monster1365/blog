@@ -42,6 +42,8 @@ npm run build
 npm run db:generate   # 스키마 변경 → 마이그레이션 SQL 생성
 npm run db:migrate    # .env.local의 DATABASE_URL에 마이그레이션 적용
 npm run db:studio     # Drizzle Studio로 데이터 보기
+npm run db:import-posts             # _posts/*.md를 posts 테이블로 옮기기 (slug 기준 upsert)
+npm run db:import-posts -- --dry-run  # DB에 쓰지 않고 변환 결과만 확인
 ```
 
 ### master (Jekyll)
@@ -118,8 +120,9 @@ categories: [Renpy, Game, Python]
 - [ ] `main` 브랜치에 마이그레이션 적용 (Production 배포 전)
 
 ### 4. 글 이관
-- [ ] `_posts/*.md`의 front matter를 읽어 `posts` 테이블에 넣는 스크립트 작성 (gray-matter)
-- [ ] 기존 글 이관 (현재 Ren'Py 글 1개)
+- [x] `_posts/*.md`의 front matter를 읽어 `posts` 테이블에 넣는 스크립트 작성 ([scripts/import-posts.ts](scripts/import-posts.ts))
+- [x] 기존 글을 Neon `develop` 브랜치로 이관 (Ren'Py 글 1개)
+- [ ] Neon `main` 브랜치로 이관 (Production 배포 전, 마이그레이션 적용 후)
 
 ### 5. 렌더링
 - [ ] 마크다운을 HTML로 변환 (remark/rehype), 코드 하이라이팅 (shiki)
