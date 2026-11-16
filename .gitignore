@@ -68,3 +68,24 @@ bower_components
 node_modules
 
 _algolia_api_key
+
+# Next.js #
+###########
+/.next/
+/out/
+next-env.d.ts
+*.tsbuildinfo
+.pnp
+.pnp.*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+*.pem
+
+# env files (DATABASE_URL, RESEND_API_KEY 등)
+.env*
+!.env.example
+
+# Vercel #
+##########
+.vercel

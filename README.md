@@ -17,21 +17,27 @@
 
 ## 로컬에서 실행하기
 
+> 위 기술 스택은 지금 배포 중인 `master`(Jekyll) 기준입니다. `develop` 브랜치는 Next.js로 옮기는 중입니다.
+
+### develop (Next.js)
+
+Node.js 20.9 이상이 필요합니다.
+
+```shell
+npm install
+npm run dev      # http://localhost:3000
+npm run lint
+npm run build
+```
+
+### master (Jekyll)
+
 ```shell
 bundle install
 bundle exec jekyll serve
 ```
 
 브라우저에서 `http://localhost:4000/blog/`로 접속합니다.
-
-CSS·JS·이미지를 다시 빌드할 때는 Gulp를 씁니다.
-
-```shell
-npm install
-npm start        # gulp: 빌드 후 BrowserSync로 http://localhost:3000 실행
-```
-
-> npm 의존성이 2017~2018년 버전이라 최신 Node에서는 설치가 실패할 수 있습니다. 아래 할 일 목록을 참고하세요.
 
 ## 디렉토리 구조
 
@@ -80,7 +86,8 @@ categories: [Renpy, Game, Python]
 - [ ] 본인 LinkedIn 링크 추가
 
 ### 1. Next.js 골격
-- [ ] Next.js 프로젝트 생성 (App Router, TypeScript)
+- [x] Next.js 프로젝트 생성 (App Router, TypeScript)
+- [x] 겹치는 Jekyll 빌드 설정 제거 (`.babelrc`, `gulpfile.babel.js`, `package-lock.json`, `.eslintrc`, `.eslintignore`)
 - [ ] 페이지 구성: 홈(글 목록·페이지네이션), 글 상세(`/[slug]`), 카테고리, About, Contact
 
 ### 2. 디자인 이식
