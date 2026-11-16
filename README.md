@@ -3,18 +3,37 @@
 직접 만들고 부딪히며 배운 것을 기록하는 개발 블로그입니다.
 
 - 사이트: https://k-coding-blog.vercel.app
-- 기반 테마: [Sleek](https://github.com/janczizikow/sleek) (MIT License) — 디자인을 Next.js로 옮겨 사용
+- 관리 페이지: https://k-coding-blog.vercel.app/admin (GitHub 로그인)
+
+## 주요 기능
+
+**블로그**
+- 글 목록, 글 상세, 태그별 모아 보기, About, Contact
+- 글마다 익명 댓글 (같은 글 안에서 브라우저별로 익명1, 익명2…, 관리자는 "글쓴이")
+- Contact 폼 → Resend로 메일 발송 (허니팟·요청 횟수 제한으로 스팸 방지)
+
+**관리 페이지 (`/admin`)**
+- 대시보드: 글·댓글·태그 수, 발행 주기, 월별 발행, 일별 방문자, 인기 글, 유입 경로
+- 글 작성·수정·삭제·숨기기, 태그 이름 바꾸기·삭제, 댓글 삭제
+- 글쓰기 편집기: 서식 도구 모음과 단축키, 미리보기, Markdown 파일 불러오기, 이미지 끌어다 놓기·붙여 넣기
+- 사이트 설정: 블로그 이름, 로고, 설명, 배너 이미지·소개글, 파비콘, About
+- 바꾼 내용은 저장하는 즉시 사이트에 반영됩니다.
+
+**개인정보**
+- 방문 통계는 IP 대신 하루마다 바뀌는 해시만 저장하고, 봇과 관리자 본인의 방문은 세지 않습니다.
+- 댓글과 Contact 메시지도 IP를 해시로만 저장합니다.
 
 ## 기술 스택
 
 | 구분 | 사용 기술 |
 | --- | --- |
 | 프레임워크 | Next.js 16 (App Router, Cache Components), React 19, TypeScript |
-| 스타일 | Sass (Sleek 테마에서 옮김) |
-| 데이터베이스 | Neon PostgreSQL + Drizzle ORM |
+| 스타일 | Sass ([Sleek](https://github.com/janczizikow/sleek) 테마 디자인을 옮김) |
+| 데이터베이스 | Neon PostgreSQL + Drizzle ORM (글·댓글·이미지·방문 기록·사이트 설정) |
 | 마크다운 | remark / rehype (GFM, 한글 강조 보완), shiki 코드 하이라이팅 |
-| 메일 | Resend (Contact 폼) |
-| 배포 | Vercel (함수 리전 `sin1`) |
+| 로그인 | GitHub OAuth (관리자 계정 하나만 허용) |
+| 메일 | Resend |
+| 배포 | Vercel (함수 리전 `sin1`, 싱가포르) |
 
 ## 브랜치와 배포
 
@@ -23,7 +42,13 @@
 | `main` | Production (공개) | https://k-coding-blog.vercel.app | `main` |
 | `develop` | Preview (Vercel 로그인 필요) | https://dev-k-coding-blog.vercel.app | `develop` |
 
-작업은 `develop`에서 하고, 확인이 끝나면 `main`에 합칩니다.
+작업은 `develop`에서 하고, Preview에서 확인한 뒤 `main`에 합칩니다. 두 환경은 DB가 따로라 Preview에서 쓴 글은 Production에 보이지 않습니다.
+
+DB 스키마를 바꿨다면 순서가 중요합니다.
+
+1. `develop` DB에 마이그레이션을 적용하고 Preview에서 확인합니다.
+2. `main` DB에 마이그레이션을 적용합니다.
+3. `develop`을 `main`에 합칩니다. (코드가 먼저 올라가면 새 테이블이 없어 오류가 납니다)
 
 ## 로컬에서 실행하기
 
@@ -37,10 +62,9 @@ npm run lint
 npm run build
 ```
 
-### 데이터베이스 (Neon + Drizzle)
+### 데이터베이스
 
-- 스키마는 [db/schema.ts](db/schema.ts), 마이그레이션 파일은 `db/migrations/`에 있습니다.
-- 스키마를 바꾸면 `develop`에 먼저 적용하고, `main`에는 Production에 합치기 전에 적용합니다.
+스키마는 [db/schema.ts](db/schema.ts), 마이그레이션은 `db/migrations/`에 있습니다.
 
 ```shell
 npm run db:generate   # 스키마 변경 → 마이그레이션 SQL 생성
@@ -53,73 +77,30 @@ npm run db:studio     # Drizzle Studio로 데이터 보기
 | 이름 | 필수 | 내용 |
 | --- | --- | --- |
 | `DATABASE_URL` | 필수 | Neon 연결 문자열 |
-| `AUTH_SECRET` | 관리 페이지 필수 | 관리자 세션 쿠키 서명용 비밀값 (32자 이상) |
-| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | 관리 페이지 필수 | GitHub OAuth App. 콜백 주소: `<사이트 주소>/api/auth/github/callback` |
+| `AUTH_SECRET` | 관리 페이지 | 관리자 세션 쿠키 서명용 비밀값 (32자 이상) |
+| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | 관리 페이지 | GitHub OAuth App. 콜백 주소: `<사이트 주소>/api/auth/github/callback` (환경마다 앱을 따로 만듭니다) |
 | `ADMIN_GITHUB_LOGIN` | 선택 | 관리자로 허용할 GitHub 아이디 (기본값 `Monster1365`) |
-| `RESEND_API_KEY` | Production 필수 | Contact 메일 발송용 Resend API 키 (로컬에서 비우면 발송 생략) |
-| `CONTACT_TO_EMAIL` | Production 필수 | Contact 메시지를 받을 주소 |
-| `CONTACT_FROM_EMAIL` | 선택 | 보내는 주소 (기본값: Resend 테스트 주소) |
+| `RESEND_API_KEY` | Production | Contact 메일 발송용 Resend API 키 (로컬에서 비우면 발송 없이 저장만) |
+| `CONTACT_TO_EMAIL` | Production | Contact 메시지를 받을 주소 |
+| `CONTACT_FROM_EMAIL` | 선택 | 보내는 주소. 비우면 Resend 테스트 주소를 쓰며, 이때는 Resend 가입 이메일로만 받을 수 있습니다 |
 | `CONTACT_HASH_SECRET` | 선택 | IP 해시용 비밀값 (기본값: `RESEND_API_KEY`) |
 
 ## 디렉토리 구조
 
 ```
-app/            # 페이지와 Server Action (홈, 글 상세 /[slug], tags, about, contact)
-app/admin/      # 관리 페이지 (글·태그·댓글 관리, GitHub 로그인 필요)
-app/api/auth/   # GitHub 로그인 (OAuth 시작·콜백)
-app/api/views/  # 방문 기록 받기 (대시보드 통계)
-app/media/      # DB에 저장한 이미지 보내기
-components/     # Header, Footer, Hero, PostCard, Comments, ContactForm, admin/ 등
-lib/            # 데이터 조회(posts, admin), 댓글, 로그인(auth), 마크다운 변환, Contact 처리, 사이트 설정
+app/
+  page.tsx, [slug]/, tags/, about/, contact/   # 공개 페이지 (+ 댓글·Contact Server Action)
+  admin/        # 관리 페이지: 대시보드, posts/, tags/, comments/, settings/, login/
+  api/auth/     # GitHub 로그인 (OAuth 시작·콜백)
+  api/views/    # 방문 기록 받기
+  media/[id]/   # DB에 저장한 이미지 보내기
+components/     # Header, Footer, Hero, PostCard, Comments, ContactForm …
+  admin/        # 관리 화면: 편집기(MarkdownEditor), 이미지 칸, 폼, 차트(charts/)
+lib/            # 데이터 조회·처리: posts, comments, contact, auth, stats, settings, markdown …
 db/             # Drizzle 스키마·클라이언트·마이그레이션
-styles/         # Sass (Sleek 테마 구조: abstracts / base / components / layout / pages)
-public/images/  # 기본 대표 이미지 (관리 페이지에서 올린 이미지는 DB `images` 테이블 → /media/<id>)
+styles/         # Sass (abstracts / base / components / layout / pages)
+public/         # 기본 이미지·파비콘 (관리 페이지에서 올린 이미지는 DB `images` 테이블)
 ```
-
-## 할 일
-
-이전 단계(Jekyll → Next.js 전환, Neon 이관, Vercel 배포, Resend Contact)는 모두 끝났습니다.
-
-### 관리 페이지 (`/admin`)
-- [x] GitHub 로그인 (Monster1365 계정만 허용, 서명된 세션 쿠키 7일)
-- [x] 글 목록 (숨긴 글 포함), 태그로 걸러 보기
-- [x] 글 작성·수정·삭제 (삭제하면 댓글도 함께 삭제)
-- [x] 글 숨기기·다시 보이기
-- [x] 태그 정리 (이름 바꾸기·합치기, 삭제, 태그별 글 수)
-- [x] 댓글 목록과 삭제
-- [x] 글을 바꾸면 사이트에 바로 반영 (`updateTag`)
-- [x] GitHub OAuth App 만들기 (Production용, Preview용 각각) + Vercel 환경 변수 등록
-- [x] 썸네일 끌어다 놓기 업로드 (브라우저에서 1600px WebP로 줄여 `images` 테이블에 저장, `/media/<id>`로 표시)
-- [x] 본문 미리보기 (사이트와 같은 변환기)
-- [x] Markdown 파일 불러오기 (버튼 또는 본문 칸에 끌어다 놓기, front matter로 제목·태그·요약 채움)
-- [x] 대시보드 (`/admin`): 글·댓글·태그 수, 발행 주기, 월별 발행, 일별 방문자, 인기 글, 유입 경로
-- [x] 방문 기록 (`page_views`): IP 대신 하루마다 바뀌는 해시만 저장, 봇·관리자·30분 안 재방문 제외
-- [ ] 쓰지 않는 이미지 정리 (썸네일을 바꾸거나 글을 지워도 예전 이미지는 남아 있음)
-- [x] 글쓰기 도구 모음: 제목·굵게·기울임·취소선·코드·링크·인용·코드 블록·목록·체크리스트·표·구분선·이미지 (⌘B/⌘I/⌘K/⌘E, ⌘Z 실행 취소)
-- [x] 본문 안에 이미지 넣기 (도구 모음 버튼, 끌어다 놓기, 붙여 넣기)
-- [x] 사이트 설정 (`/admin/settings`): 블로그 이름·짧은 이름·설명·배너 이미지·배너 소개글·파비콘·About (`site_settings` 테이블)
-- [x] 새 글·글 수정·사이트 설정 화면 가운데 정렬
-- [ ] Neon `main`에 `comments`·`images`·`page_views`·`site_settings` 마이그레이션 적용 (main에 합치기 전)
-
-### 댓글
-- [x] 글마다 댓글 달기 (바로 게시)
-- [x] 작성자 표시: 같은 글 안에서 브라우저별로 익명1, 익명2…, 관리자는 "글쓴이"
-- [x] 스팸 방지 (허니팟, 2초 이내 제출 차단, 같은 IP 10분에 5개·사이트 전체 1시간에 100개)
-- [x] 삭제는 관리 페이지에서 관리자만
-- [x] 댓글은 요청마다 읽어서 항상 최신 상태로 표시 (글 본문은 미리 만든 페이지)
-- [x] Neon `develop`에 `comments`, `comment_participants` 마이그레이션 적용
-- [ ] Neon `main`에 마이그레이션 적용 (main에 합치기 전)
-
-### 사이트
-- [ ] 홈 글 목록 페이지네이션 (글이 늘어나면)
-- [ ] 메인 배경 이미지와 Ren'Py 글 대표 이미지를 직접 고른 이미지로 교체
-- [ ] 파비콘과 아이콘 교체
-- [ ] 본인 LinkedIn 링크 추가
-- [ ] Resend에서 발신 도메인 인증 후 `CONTACT_FROM_EMAIL` 설정 (그 전에는 Resend 가입 이메일로만 받을 수 있음)
-
-### 글쓰기
-- [ ] Ren'Py 시리즈 이어 쓰기 (충돌 검사, 카메라 구조 등)
-- [ ] Ren'Py 글 다듬기 (`= 그림제시` 자리 그림 넣기, 중복된 코드 블록, 오타)
 
 ## 라이선스
 
