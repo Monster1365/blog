@@ -9,8 +9,7 @@
     "lint": "eslint",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:studio": "drizzle-kit studio",
-    "db:import-posts": "tsx scripts/import-posts.ts"
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.1",
@@ -37,9 +36,7 @@
     "drizzle-kit": "^0.31.11",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
-    "gray-matter": "^4.0.3",
     "sass": "^1.108.2",
-    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }

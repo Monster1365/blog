@@ -12,12 +12,6 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
-    // Legacy Jekyll files (removed after the Next.js migration)
-    "_js/**",
-    "_includes/**",
-    "assets/**",
-    "script/**",
-    "sw.js",
   ]),
 ]);
 

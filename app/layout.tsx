@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: { default: site.title, template: `%s | ${site.title}` },
   description: site.description,
+  applicationName: site.title,
+  appleWebApp: { title: site.shortTitle },
   authors: [{ name: site.author }],
   openGraph: {
     type: "website",
@@ -20,7 +22,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="ko">
       <body className="site">
-        <Header title={site.title} navigation={site.navigation} />
+        <Header title={site.shortTitle} navigation={site.navigation} />
         {children}
         <Footer />
       </body>

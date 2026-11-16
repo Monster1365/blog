@@ -1,9 +1,11 @@
 /** 사이트 설정 (기존 Jekyll `_config.yml`에서 옮김) */
 export const site = {
-  title: "Blog",
+  title: "Monster K",
+  /** 헤더 로고 등 짧게 쓸 때 */
+  shortTitle: "M.K.",
   author: "SeoHyun Han",
   description:
-    "SeoHyun Han's dev blog — documenting what I learn, build, and discover through hands-on development, including game development with Ren'Py and Python.",
+    "Monster K(M.K.) — SeoHyun Han's dev blog, documenting what I learn, build, and discover through hands-on development, including game development with Ren'Py and Python.",
   tagline:
     "Documenting what I learn, build, and discover through hands-on development.",
   heroImage: "sleek",
