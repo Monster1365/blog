@@ -10,6 +10,7 @@ const links = [
   { href: "/admin/posts/new", label: "새 글" },
   { href: "/admin/tags", label: "태그" },
   { href: "/admin/comments", label: "댓글" },
+  { href: "/admin/settings", label: "사이트 설정" },
 ];
 
 export default function AdminNav() {

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import Comments from "@/components/Comments";
 import { Hero } from "@/components/Hero";
 import TagLabels from "@/components/TagLabels";
@@ -38,7 +39,33 @@ export async function generateMetadata({
   };
 }
 
-export default async function PostPage({ params }: PageProps<"/[slug]">) {
+/**
+ * 글 본문은 Suspense 안에서 params를 받습니다.
+ * 빌드 때 아는 글(generateStaticParams)은 본문까지 미리 만들어지고,
+ * 사이트 설정 등 공통 캐시가 바뀌어 페이지 뼈대를 다시 만들 때도 막히지 않습니다.
+ */
+export default function PostPage({ params }: PageProps<"/[slug]">) {
+  return (
+    <Suspense fallback={<PostSkeleton />}>
+      <PostContent params={params} />
+    </Suspense>
+  );
+}
+
+function PostSkeleton() {
+  return (
+    <>
+      <div className="hero dark-bg" aria-hidden="true" />
+      <main className="site__content">
+        <div className="container">
+          <p className="post-content admin-empty">글을 불러오는 중…</p>
+        </div>
+      </main>
+    </>
+  );
+}
+
+async function PostContent({ params }: Pick<PageProps<"/[slug]">, "params">) {
   const { slug } = await params;
   const post = await getPostBySlug(slug);
   if (!post) notFound();

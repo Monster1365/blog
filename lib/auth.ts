@@ -2,6 +2,7 @@ import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 
 /**
  * 관리자 인증 (GitHub OAuth)
@@ -77,6 +78,8 @@ export function newSession(login: string): AdminSession {
 /** 로그인한 관리자 정보. 로그인하지 않았으면 null */
 export async function getAdmin(): Promise<AdminSession | null> {
   const store = await cookies();
+  // 세션 만료를 현재 시각과 비교하므로, 항상 요청 시점에 계산하도록 알립니다.
+  await connection();
   return decodeSession(store.get(SESSION_COOKIE)?.value);
 }
 

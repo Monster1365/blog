@@ -4,7 +4,8 @@ import { and, count, eq, gte } from "drizzle-orm";
 import { Resend } from "resend";
 import { db } from "@/db";
 import { contactMessages } from "@/db/schema";
-import { site } from "@/lib/site";
+import { getSiteSettings } from "@/lib/settings";
+import { siteUrl } from "@/lib/site";
 
 export const CONTACT_LIMITS = {
   name: 100,
@@ -77,8 +78,10 @@ export async function saveAndSendContactMessage(
 
   const apiKey = process.env.RESEND_API_KEY;
   const to = process.env.CONTACT_TO_EMAIL;
+  const { title } = await getSiteSettings();
+  // 다른 메일과 헷갈리지 않게 보내는 이름·제목에 "블로그 문의"임을 적습니다.
   const from =
-    process.env.CONTACT_FROM_EMAIL ?? `${site.title} Contact <onboarding@resend.dev>`;
+    process.env.CONTACT_FROM_EMAIL ?? `${title} 블로그 문의 <onboarding@resend.dev>`;
 
   if (!apiKey || !to) {
     if (process.env.NODE_ENV !== "production") {
@@ -101,8 +104,10 @@ export async function saveAndSendContactMessage(
     from,
     to,
     replyTo: input.email,
-    subject: `[${site.title}] ${oneLine(input.name)}님의 문의`,
+    subject: `[${title} 블로그] Contact 문의 - ${oneLine(input.name).slice(0, 50)}`,
     text: [
+      `${title} 블로그(${siteUrl})의 Contact 폼으로 받은 메시지입니다.`,
+      "",
       `이름: ${oneLine(input.name)}`,
       `이메일: ${input.email}`,
       `보낸 시각: ${sentAt}`,

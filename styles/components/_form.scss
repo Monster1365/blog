@@ -141,3 +141,48 @@ textarea {
     color: $error;
   }
 }
+
+// Contact 페이지: 연한 배경 위에 카드
+.contact-page {
+  background-color: $light-bg-color;
+}
+
+.contact-page__inner {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 2.5rem 0 4rem;
+
+  @include breakpoint($md) {
+    padding: 3.75rem 0 5rem;
+  }
+}
+
+.contact-page__intro {
+  margin-bottom: 1.75rem;
+  color: $text-color;
+
+  p:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.contact-card {
+  padding: 1.75rem 1.5rem 1.25rem;
+  background-color: $bg-color;
+  border: 1px solid $border;
+  border-radius: 10px;
+  box-shadow: 0 2px 24px rgba(52, 56, 81, 0.08);
+
+  @include breakpoint($md) {
+    padding: 2.25rem 2.5rem 1.75rem;
+  }
+
+  .contact-form {
+    margin-top: 1.5rem;
+  }
+}
+
+.contact-card__title {
+  margin: 0;
+  font-size: 1.25rem;
+}

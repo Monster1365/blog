@@ -1,9 +1,10 @@
 "use client";
 
-import { type ReactNode, type RefObject, useActionState, useRef, useState, useTransition } from "react";
-import { type PostFormState, previewMarkdown, savePost } from "@/app/admin/actions";
-import ThumbnailField from "@/components/admin/ThumbnailField";
-import { frontMatterList, frontMatterString, parseFrontMatter } from "@/lib/frontmatter";
+import { type ReactNode, type RefObject, useActionState, useRef } from "react";
+import { type PostFormState, savePost } from "@/app/admin/actions";
+import ImageField from "@/components/admin/ImageField";
+import MarkdownEditor from "@/components/admin/MarkdownEditor";
+import { type FrontMatter, frontMatterList, frontMatterString } from "@/lib/frontmatter";
 
 export type PostFormValues = {
   id?: number;
@@ -17,11 +18,9 @@ export type PostFormValues = {
 };
 
 const initialState: PostFormState = { status: "idle" };
-const MARKDOWN_ACCEPT = ".md,.markdown,.mdx,.txt,text/markdown,text/plain";
 
 export default function PostForm({ post }: { post?: PostFormValues }) {
   const [state, formAction, pending] = useActionState(savePost, initialState);
-  const errors = state.fieldErrors ?? {};
 
   // 오류로 돌아왔으면 방금 입력한 값, 아니면 저장된 값
   const v = state.values ?? {
@@ -40,7 +39,7 @@ export default function PostForm({ post }: { post?: PostFormValues }) {
       key={state.nonce ?? "initial"}
       v={v}
       postId={post?.id}
-      errors={errors}
+      errors={state.fieldErrors ?? {}}
       message={state.message}
       formAction={formAction}
       pending={pending}
@@ -67,34 +66,9 @@ function PostFormBody({
   const slugRef = useRef<HTMLInputElement>(null);
   const tagsRef = useRef<HTMLInputElement>(null);
   const excerptRef = useRef<HTMLInputElement>(null);
-  const contentRef = useRef<HTMLTextAreaElement>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
 
-  const [tab, setTab] = useState<"write" | "preview">("write");
-  const [previewHtml, setPreviewHtml] = useState("");
-  const [previewing, startPreview] = useTransition();
-  const [importNote, setImportNote] = useState<string | null>(null);
-  const [dropping, setDropping] = useState(false);
-
-  function showPreview() {
-    setTab("preview");
-    const markdown = contentRef.current?.value ?? "";
-    startPreview(async () => setPreviewHtml(markdown.trim() ? await previewMarkdown(markdown) : ""));
-  }
-
-  /** 마크다운 파일 → 본문. front matter가 있으면 비어 있는 칸(제목·태그·요약·주소)도 채웁니다. */
-  async function importMarkdown(file: File | undefined) {
-    if (!file) return;
-    if (file.size > 2 * 1024 * 1024) {
-      setImportNote("2MB 이하의 마크다운 파일만 불러올 수 있습니다.");
-      return;
-    }
-    const content = contentRef.current;
-    if (content?.value.trim() && !window.confirm("지금 쓴 본문을 파일 내용으로 바꿀까요?")) return;
-
-    const { data, content: body } = parseFrontMatter(await file.text());
-    if (content) content.value = body;
-
+  /** .md 파일의 front matter로 비어 있는 칸(제목·태그·요약·주소) 채우기 */
+  function fillFromFrontMatter(data: FrontMatter): string[] {
     const filled: string[] = [];
     const fill = (ref: RefObject<HTMLInputElement | null>, value: string | undefined, name: string) => {
       if (ref.current && value && !ref.current.value.trim()) {
@@ -106,11 +80,7 @@ function PostFormBody({
     fill(tagsRef, frontMatterList(data, "tags", "categories", "category")?.join(", "), "태그");
     fill(excerptRef, frontMatterString(data, "excerpt", "description", "summary"), "요약");
     fill(slugRef, frontMatterString(data, "slug", "permalink")?.replace(/^\/|\/$/g, ""), "주소");
-
-    setTab("write");
-    setImportNote(
-      `"${file.name}" 내용을 본문에 넣었습니다.` + (filled.length ? ` (${filled.join("·")}도 채움)` : ""),
-    );
+    return filled;
   }
 
   return (
@@ -136,95 +106,26 @@ function PostFormBody({
       </div>
 
       <div className="admin-form__row">
-        <ThumbnailField defaultValue={v.featuredImg} error={errors.featuredImg} />
+        <ImageField
+          name="featuredImg"
+          label="썸네일 (대표 이미지)"
+          defaultValue={v.featuredImg}
+          error={errors.featuredImg}
+        />
         <Field id="excerpt" label="요약" hint="비우면 본문 첫 문단으로 만듭니다." error={errors.excerpt}>
           <input ref={excerptRef} id="excerpt" name="excerpt" defaultValue={v.excerpt} maxLength={300} />
         </Field>
       </div>
 
-      <div className={`admin-field${errors.content ? " --error" : ""}`}>
-        <div className="editor-toolbar">
-          <div className="editor-tabs" role="tablist" aria-label="본문 보기 방식">
-            <button
-              type="button"
-              role="tab"
-              aria-selected={tab === "write"}
-              className="editor-tab"
-              onClick={() => setTab("write")}
-            >
-              작성
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={tab === "preview"}
-              className="editor-tab"
-              onClick={showPreview}
-            >
-              미리보기
-            </button>
-          </div>
-          <button type="button" className="admin-btn" onClick={() => fileRef.current?.click()}>
-            Markdown 파일 불러오기
-          </button>
-          <input
-            ref={fileRef}
-            type="file"
-            accept={MARKDOWN_ACCEPT}
-            hidden
-            onChange={(e) => {
-              importMarkdown(e.target.files?.[0]);
-              e.target.value = "";
-            }}
-          />
-        </div>
-
-        <label htmlFor="content" className="visually-hidden">
-          본문 (Markdown)
-        </label>
-        {/* 미리보기 중에도 textarea는 남겨 두어 값이 함께 저장되게 합니다. */}
-        <textarea
-          ref={contentRef}
-          id="content"
-          name="content"
-          className={`admin-form__content${dropping ? " --dropping" : ""}`}
-          defaultValue={v.content}
-          rows={24}
-          required
-          hidden={tab !== "write"}
-          placeholder="Markdown으로 쓰세요. .md 파일을 여기로 끌어다 놓아도 됩니다."
-          onDragOver={(e) => {
-            if (e.dataTransfer.types.includes("Files")) {
-              e.preventDefault();
-              setDropping(true);
-            }
-          }}
-          onDragLeave={() => setDropping(false)}
-          onDrop={(e) => {
-            const file = e.dataTransfer.files[0];
-            if (!file) return;
-            e.preventDefault();
-            setDropping(false);
-            importMarkdown(file);
-          }}
-        />
-        {tab === "preview" && (
-          <div className="editor-preview" aria-live="polite" aria-busy={previewing}>
-            {previewing ? (
-              <p className="admin-empty">미리보기를 만드는 중…</p>
-            ) : previewHtml ? (
-              <div className="post-body" dangerouslySetInnerHTML={{ __html: previewHtml }} />
-            ) : (
-              <p className="admin-empty">본문이 비어 있습니다.</p>
-            )}
-          </div>
-        )}
-        {errors.content ? (
-          <span className="admin-field__error">{errors.content}</span>
-        ) : (
-          importNote && <span className="admin-field__hint">{importNote}</span>
-        )}
-      </div>
+      <MarkdownEditor
+        id="content"
+        name="content"
+        label="본문 (Markdown)"
+        defaultValue={v.content}
+        required
+        error={errors.content}
+        onFrontMatter={fillFromFrontMatter}
+      />
 
       <label className="admin-form__check">
         <input type="checkbox" name="published" defaultChecked={v.published} />

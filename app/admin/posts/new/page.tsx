@@ -17,7 +17,7 @@ export default function NewPostPage() {
 async function NewPost() {
   await requireAdmin();
   return (
-    <section>
+    <section className="admin-narrow">
       <h2 className="admin-title">새 글</h2>
       <PostForm />
     </section>

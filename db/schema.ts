@@ -92,6 +92,31 @@ export const comments = pgTable(
 
 export type Comment = typeof comments.$inferSelect;
 
+/**
+ * 사이트 정보 (관리 페이지 > 사이트 설정). 한 줄(id = 1)만 씁니다.
+ * 값이 비어 있으면 lib/site.ts의 기본값을 씁니다.
+ */
+export const siteSettings = pgTable("site_settings", {
+  id: integer().primaryKey().default(1),
+  title: text(),
+  shortTitle: text("short_title"),
+  description: text(),
+  /** 홈 배너 안쪽 소개글 */
+  tagline: text(),
+  /** 홈 배너 이미지 (이미지 이름 또는 /media/<id>) */
+  heroImage: text("hero_image"),
+  /** 파비콘 (/media/<id>) */
+  favicon: text(),
+  /** About 페이지 본문 (Markdown) */
+  about: text(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+});
+
+export type SiteSettingsRow = typeof siteSettings.$inferSelect;
+
 /** PostgreSQL bytea ↔ Buffer (Neon HTTP 드라이버는 Buffer로 돌려줍니다) */
 const bytea = customType<{ data: Buffer; driverData: string | Buffer }>({
   dataType: () => "bytea",

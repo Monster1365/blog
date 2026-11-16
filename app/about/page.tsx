@@ -1,17 +1,18 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
 import type { Metadata } from "next";
-import { cacheLife } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
 import { SmallHero } from "@/components/Hero";
 import { renderMarkdown } from "@/lib/markdown";
+import { SETTINGS_TAG, getSiteSettings } from "@/lib/settings";
 
 export const metadata: Metadata = { title: "About" };
 
+/** About 본문은 관리 페이지 > 사이트 설정에서 바꿉니다. */
 async function getAboutHtml() {
   "use cache";
   cacheLife("max");
-  const markdown = await readFile(path.join(process.cwd(), "content/about.md"), "utf8");
-  return renderMarkdown(markdown);
+  cacheTag(SETTINGS_TAG);
+  const { about } = await getSiteSettings();
+  return renderMarkdown(about);
 }
 
 export default async function AboutPage() {

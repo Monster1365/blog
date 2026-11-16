@@ -240,9 +240,31 @@
   }
 }
 
-// 글 작성·수정 폼
-.admin-form {
+// 글 작성·수정·사이트 설정: 가운데 정렬
+.admin-narrow {
   max-width: 60rem;
+  margin: 0 auto;
+}
+
+.admin-form {
+  width: 100%;
+}
+
+.admin-fieldset {
+  margin: 0 0 2rem;
+  padding: 1.25rem 1.25rem 0.25rem;
+  border: 1px solid $border;
+  border-radius: 8px;
+
+  legend {
+    padding: 0 0.5rem;
+    font-weight: 700;
+    color: $heading-color;
+  }
+
+  .admin-help {
+    margin: 1.5rem 0 0;
+  }
 }
 
 .admin-form__row {
@@ -415,6 +437,15 @@
 
   &[aria-busy="true"] {
     cursor: progress;
+  }
+}
+
+// 파비콘처럼 정사각형 미리 보기는 작게
+.thumb-drop.--square {
+  max-width: 10rem;
+
+  .thumb-drop__hint {
+    font-size: 0.75rem;
   }
 }
 
@@ -873,4 +904,66 @@
   height: 8px;
   background-color: var(--viz-accent);
   border-radius: 0 4px 4px 0;
+}
+
+// 마크다운 도구 모음
+.md-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  background-color: $light-bg-color;
+  border: 1px solid $outline;
+  border-bottom: 0;
+  border-radius: 4px 4px 0 0;
+
+  + .admin-form__content,
+  ~ .editor-preview {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+}
+
+.md-toolbar__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 6px;
+  font: inherit;
+  font-size: 0.8125rem;
+  line-height: 1;
+  color: $text-color;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+
+  code {
+    padding: 0;
+    font-size: 0.75rem;
+    background: none;
+  }
+
+  &:hover:not(:disabled),
+  &:focus-visible {
+    color: $primary;
+    background-color: $bg-color;
+    border-color: $outline;
+    outline: 0;
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.4;
+  }
+}
+
+.md-toolbar__sep {
+  width: 1px;
+  height: 20px;
+  margin: 0 4px;
+  background-color: $outline;
 }

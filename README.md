@@ -73,7 +73,6 @@ components/     # Header, Footer, Hero, PostCard, Comments, ContactForm, admin/ 
 lib/            # 데이터 조회(posts, admin), 댓글, 로그인(auth), 마크다운 변환, Contact 처리, 사이트 설정
 db/             # Drizzle 스키마·클라이언트·마이그레이션
 styles/         # Sass (Sleek 테마 구조: abstracts / base / components / layout / pages)
-content/        # About 페이지 마크다운
 public/images/  # 기본 대표 이미지 (관리 페이지에서 올린 이미지는 DB `images` 테이블 → /media/<id>)
 ```
 
@@ -96,8 +95,11 @@ public/images/  # 기본 대표 이미지 (관리 페이지에서 올린 이미�
 - [x] 대시보드 (`/admin`): 글·댓글·태그 수, 발행 주기, 월별 발행, 일별 방문자, 인기 글, 유입 경로
 - [x] 방문 기록 (`page_views`): IP 대신 하루마다 바뀌는 해시만 저장, 봇·관리자·30분 안 재방문 제외
 - [ ] 쓰지 않는 이미지 정리 (썸네일을 바꾸거나 글을 지워도 예전 이미지는 남아 있음)
-- [ ] 본문 안에 이미지 넣기 (지금은 썸네일만 업로드 가능)
-- [ ] Neon `main`에 `images`, `page_views` 마이그레이션 적용 (main에 합치기 전)
+- [x] 글쓰기 도구 모음: 제목·굵게·기울임·취소선·코드·링크·인용·코드 블록·목록·체크리스트·표·구분선·이미지 (⌘B/⌘I/⌘K/⌘E, ⌘Z 실행 취소)
+- [x] 본문 안에 이미지 넣기 (도구 모음 버튼, 끌어다 놓기, 붙여 넣기)
+- [x] 사이트 설정 (`/admin/settings`): 블로그 이름·짧은 이름·설명·배너 이미지·배너 소개글·파비콘·About (`site_settings` 테이블)
+- [x] 새 글·글 수정·사이트 설정 화면 가운데 정렬
+- [ ] Neon `main`에 `comments`·`images`·`page_views`·`site_settings` 마이그레이션 적용 (main에 합치기 전)
 
 ### 댓글
 - [x] 글마다 댓글 달기 (바로 게시)

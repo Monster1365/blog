@@ -5,13 +5,14 @@ import { refresh, updateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { db } from "@/db";
-import { comments, posts } from "@/db/schema";
+import { comments, posts, siteSettings } from "@/db/schema";
 import { getPostForAdmin, isSlugTaken, postsWithTag } from "@/lib/admin";
 import { SESSION_COOKIE, requireAdmin } from "@/lib/auth";
 import { makeExcerpt, parseTags, slugify } from "@/lib/format";
 import { IMAGE_LIMITS, saveImage } from "@/lib/images";
 import { renderMarkdown } from "@/lib/markdown";
 import { POSTS_TAG, postTag } from "@/lib/posts";
+import { SETTINGS_TAG } from "@/lib/settings";
 
 /** 공개 페이지 캐시를 비워 바뀐 내용이 바로 보이게 합니다. */
 function refreshPublic(...slugs: (string | null | undefined)[]) {
@@ -253,4 +254,65 @@ export async function previewMarkdown(markdown: string): Promise<string> {
   await requireAdmin();
   if (typeof markdown !== "string" || markdown.length > 500_000) return "";
   return renderMarkdown(markdown);
+}
+
+type SettingsField = "title" | "shortTitle" | "description" | "tagline" | "heroImage" | "favicon" | "about";
+
+export type SettingsFormState = {
+  status: "idle" | "success" | "error";
+  message?: string;
+  fieldErrors?: Partial<Record<SettingsField, string>>;
+  values?: Record<SettingsField, string>;
+  /** 저장·오류 때마다 바뀌는 값 (폼을 새로 그리는 key) */
+  nonce?: number;
+};
+
+const SETTINGS_LIMITS: Record<SettingsField, number> = {
+  title: 60,
+  shortTitle: 20,
+  description: 300,
+  tagline: 200,
+  heroImage: 300,
+  favicon: 300,
+  about: 50_000,
+};
+
+/** 사이트 정보 저장 (비워 두면 기본값을 씁니다) */
+export async function saveSettings(
+  _prev: SettingsFormState,
+  formData: FormData,
+): Promise<SettingsFormState> {
+  await requireAdmin();
+
+  const values = Object.fromEntries(
+    (Object.keys(SETTINGS_LIMITS) as SettingsField[]).map((key) => {
+      const raw = formData.get(key);
+      return [key, typeof raw === "string" ? raw.replace(/\r\n/g, "\n").trim() : ""];
+    }),
+  ) as Record<SettingsField, string>;
+
+  const fieldErrors: SettingsFormState["fieldErrors"] = {};
+  for (const [key, max] of Object.entries(SETTINGS_LIMITS) as [SettingsField, number][]) {
+    if (values[key].length > max) fieldErrors[key] = `${max.toLocaleString()}자 이하로 입력해 주세요.`;
+  }
+  for (const key of ["heroImage", "favicon"] as const) {
+    if (values[key] && !IMAGE_RE.test(values[key])) {
+      fieldErrors[key] = "이미지 이름(예: sleek) 또는 /로 시작하는 경로를 입력해 주세요.";
+    }
+  }
+  if (Object.keys(fieldErrors).length > 0) {
+    return { status: "error", message: "입력한 내용을 확인해 주세요.", fieldErrors, values, nonce: Date.now() };
+  }
+
+  const row = Object.fromEntries(
+    Object.entries(values).map(([k, v]) => [k, v || null]),
+  ) as Record<SettingsField, string | null>;
+
+  await db
+    .insert(siteSettings)
+    .values({ id: 1, ...row })
+    .onConflictDoUpdate({ target: siteSettings.id, set: { ...row, updatedAt: new Date() } });
+
+  updateTag(SETTINGS_TAG);
+  return { status: "success", message: "저장했습니다. 사이트에 바로 반영됩니다.", values, nonce: Date.now() };
 }

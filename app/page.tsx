@@ -1,16 +1,16 @@
 import { Hero } from "@/components/Hero";
 import PostCard from "@/components/PostCard";
 import { getPublishedPosts } from "@/lib/posts";
-import { site } from "@/lib/site";
+import { getSiteSettings } from "@/lib/settings";
 
 export default async function HomePage() {
-  const posts = await getPublishedPosts();
+  const [posts, s] = await Promise.all([getPublishedPosts(), getSiteSettings()]);
 
   return (
     <>
-      <Hero image={site.heroImage} title={site.title} priority>
-        <h1 className="hero__title">{site.title}</h1>
-        <p className="hero__meta">{site.tagline}</p>
+      <Hero image={s.heroImage} title={s.title} priority>
+        <h1 className="hero__title">{s.title}</h1>
+        <p className="hero__meta">{s.tagline}</p>
       </Hero>
 
       <main className="site__content">

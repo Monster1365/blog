@@ -28,7 +28,7 @@ async function EditPost({ params }: Pick<PageProps<"/admin/posts/[id]/edit">, "p
   if (!post) notFound();
 
   return (
-    <section>
+    <section className="admin-narrow">
       <div className="admin-toolbar">
         <h2 className="admin-title">글 수정</h2>
         <div className="admin-actions">

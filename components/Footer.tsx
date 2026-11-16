@@ -1,10 +1,18 @@
-import { cacheLife } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
+import { SETTINGS_TAG, getSiteSettings } from "@/lib/settings";
 import { site } from "@/lib/site";
+
+/**
+ * 연도는 모듈을 불러올 때 한 번만 계산합니다.
+ * 렌더링 중에 현재 시각을 읽으면 Next.js가 페이지를 미리 만들지 못합니다.
+ */
+const YEAR = new Date().getFullYear();
 
 export default async function Footer() {
   "use cache";
-  cacheLife("days");
-  const year = new Date().getFullYear();
+  cacheLife("max");
+  cacheTag(SETTINGS_TAG);
+  const { title } = await getSiteSettings();
 
   return (
     <footer className="footer">
@@ -23,7 +31,7 @@ export default async function Footer() {
           </a>
         </nav>
         <span>
-          &copy; {year} {site.title}. All rights reserved.
+          &copy; {YEAR} {title}. All rights reserved.
         </span>
       </div>
     </footer>
