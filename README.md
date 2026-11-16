@@ -120,12 +120,12 @@ categories: [Renpy, Game, Python]
 - [x] Drizzle ORM + `@neondatabase/serverless` 설정
 - [x] `posts` 테이블 만들기: `id`, `slug`(unique), `title`, `content`(markdown), `excerpt`, `featured_img`, `categories`(text[]), `published`, `published_at`, `created_at`, `updated_at`
 - [x] `develop` 브랜치에 마이그레이션 적용
-- [ ] `main` 브랜치에 마이그레이션 적용 (Production 배포 전)
+- [x] `main` 브랜치에 마이그레이션 적용
 
 ### 4. 글 이관
 - [x] `_posts/*.md`의 front matter를 읽어 `posts` 테이블에 넣는 스크립트 작성 ([scripts/import-posts.ts](scripts/import-posts.ts))
 - [x] 기존 글을 Neon `develop` 브랜치로 이관 (Ren'Py 글 1개)
-- [ ] Neon `main` 브랜치로 이관 (Production 배포 전, 마이그레이션 적용 후)
+- [x] Neon `main` 브랜치로 이관
 
 ### 5. 렌더링
 - [x] 마크다운을 HTML로 변환 (remark/rehype, GFM, 한글 강조 보완), 코드 하이라이팅 (shiki)
@@ -141,9 +141,12 @@ categories: [Renpy, Game, Python]
 - [ ] Contact 페이지 본문 직접 작성
 
 ### 7. 배포 (Vercel)
-- [ ] Vercel 프로젝트를 GitHub 저장소와 연결
-- [ ] 환경 변수 `DATABASE_URL`, `RESEND_API_KEY`를 Preview와 Production에 등록
+- [x] Vercel 프로젝트(`blog`)를 GitHub 저장소와 연결 (함수 리전 `sin1`)
+- [x] Next.js 파일이 없는 브랜치는 빌드 건너뛰기 (`test ! -f next.config.ts`, Jekyll인 master 빌드 실패 방지)
+- [x] `DATABASE_URL` 등록 (Preview → Neon `develop`, Production → Neon `main`)
+- [ ] `RESEND_API_KEY` 등록 (6단계에서)
 - [ ] `develop`은 Preview, `master`는 Production으로 배포
+- [ ] 공개 전에 Production의 Vercel Authentication(배포 보호) 끄기
 
 ### 8. 전환 마무리
 - [ ] Jekyll 관련 파일 삭제 (`_config.yml`, `_layouts/`, `_includes/`, `Gemfile`, gemspec, Gulp 설정, `sw.js`, `.travis.yml`, 테마 샘플 이미지 등)
