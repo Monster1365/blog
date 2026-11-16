@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/about": ["./content/**/*"],
   },
+  async redirects() {
+    // 카테고리 → 태그로 이름이 바뀐 예전 주소
+    return [{ source: "/categories", destination: "/tags", permanent: true }];
+  },
 };
 
 export default nextConfig;

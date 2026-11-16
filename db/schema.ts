@@ -4,8 +4,10 @@ import {
   index,
   integer,
   pgTable,
+  primaryKey,
   text,
   timestamp,
+  unique,
 } from "drizzle-orm/pg-core";
 
 export const posts = pgTable(
@@ -19,7 +21,8 @@ export const posts = pgTable(
     excerpt: text(),
     /** 대표 이미지 이름 또는 경로 (예: "renpy-playermove") */
     featuredImg: text("featured_img"),
-    categories: text()
+    /** 태그 목록. DB 컬럼 이름은 처음 만든 그대로 `categories`입니다. */
+    tags: text("categories")
       .array()
       .notNull()
       .default(sql`'{}'::text[]`),
@@ -35,9 +38,58 @@ export const posts = pgTable(
   },
   (t) => [
     index("posts_published_at_idx").on(t.published, t.publishedAt.desc()),
-    index("posts_categories_idx").using("gin", t.categories),
+    index("posts_categories_idx").using("gin", t.tags),
   ],
 );
+
+/**
+ * 글마다 댓글 작성자(브라우저)에게 붙이는 익명 번호.
+ * 같은 글 안에서 같은 브라우저는 항상 같은 번호를 씁니다.
+ */
+export const commentParticipants = pgTable(
+  "comment_participants",
+  {
+    postId: integer("post_id")
+      .notNull()
+      .references(() => posts.id, { onDelete: "cascade" }),
+    /** 브라우저 식별 쿠키의 HMAC 해시 */
+    commenterHash: text("commenter_hash").notNull(),
+    number: integer().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.postId, t.commenterHash] }),
+    unique("comment_participants_post_number_unique").on(t.postId, t.number),
+  ],
+);
+
+export const comments = pgTable(
+  "comments",
+  {
+    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    postId: integer("post_id")
+      .notNull()
+      .references(() => posts.id, { onDelete: "cascade" }),
+    /** 익명 번호. 관리자가 쓴 댓글은 null (글쓴이로 표시) */
+    anonNumber: integer("anon_number"),
+    isAuthor: boolean("is_author").notNull().default(false),
+    body: text().notNull(),
+    commenterHash: text("commenter_hash").notNull(),
+    ipHash: text("ip_hash").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("comments_post_created_idx").on(t.postId, t.createdAt),
+    index("comments_ip_created_idx").on(t.ipHash, t.createdAt),
+    index("comments_created_idx").on(t.createdAt),
+  ],
+);
+
+export type Comment = typeof comments.$inferSelect;
 
 export type Post = typeof posts.$inferSelect;
 export type NewPost = typeof posts.$inferInsert;

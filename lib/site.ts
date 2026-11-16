@@ -12,6 +12,7 @@ export const site = {
   githubUsername: "Monster1365",
   navigation: [
     { name: "Home", href: "/" },
+    { name: "Tags", href: "/tags" },
     { name: "About", href: "/about" },
     { name: "Contact", href: "/contact" },
   ],

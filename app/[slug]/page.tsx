@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import CategoryLabels from "@/components/CategoryLabels";
+import Comments from "@/components/Comments";
 import { Hero } from "@/components/Hero";
+import TagLabels from "@/components/TagLabels";
 import { featuredImageSrc, formatDate } from "@/lib/format";
 import { getPostBySlug, getPublishedPosts } from "@/lib/posts";
 
@@ -31,7 +32,7 @@ export async function generateMetadata({
       title: post.title,
       description: post.excerpt ?? undefined,
       publishedTime: post.publishedAt,
-      tags: post.categories,
+      tags: post.tags,
       images: post.featuredImg ? [featuredImageSrc(post.featuredImg)] : undefined,
     },
   };
@@ -45,9 +46,9 @@ export default async function PostPage({ params }: PageProps<"/[slug]">) {
   return (
     <>
       <Hero image={post.featuredImg} title={post.title} priority>
-        {post.categories.length > 0 && (
+        {post.tags.length > 0 && (
           <div className="hero__categories">
-            <CategoryLabels categories={post.categories} />
+            <TagLabels tags={post.tags} />
           </div>
         )}
         <h1 className="hero__title">{post.title}</h1>
@@ -90,6 +91,8 @@ export default async function PostPage({ params }: PageProps<"/[slug]">) {
             </div>
           </nav>
         </div>
+
+        <Comments postId={post.id} />
       </main>
     </>
   );

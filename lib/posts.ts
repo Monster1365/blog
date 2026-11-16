@@ -5,15 +5,17 @@ import { posts } from "@/db/schema";
 import { readingMinutes } from "./format";
 import { renderMarkdown } from "./markdown";
 
-/** 글이 바뀌면 revalidateTag(POSTS_TAG, "max")로 캐시를 비웁니다. */
+/** 글이 바뀌면 updateTag(POSTS_TAG)로 캐시를 비웁니다. */
 export const POSTS_TAG = "posts";
+export const postTag = (slug: string) => `post:${slug}`;
 
 export type PostSummary = {
+  id: number;
   slug: string;
   title: string;
   excerpt: string | null;
   featuredImg: string | null;
-  categories: string[];
+  tags: string[];
   /** ISO 8601 */
   publishedAt: string;
 };
@@ -35,11 +37,12 @@ export async function getPublishedPosts(): Promise<PostSummary[]> {
 
   const rows = await db
     .select({
+      id: posts.id,
       slug: posts.slug,
       title: posts.title,
       excerpt: posts.excerpt,
       featuredImg: posts.featuredImg,
-      categories: posts.categories,
+      tags: posts.tags,
       publishedAt: posts.publishedAt,
       createdAt: posts.createdAt,
     })
@@ -57,7 +60,7 @@ export async function getPublishedPosts(): Promise<PostSummary[]> {
 export async function getPostBySlug(slug: string): Promise<PostDetail | null> {
   "use cache";
   cacheLife("hours");
-  cacheTag(POSTS_TAG, `post:${slug}`);
+  cacheTag(POSTS_TAG, postTag(slug));
 
   const [row] = await db
     .select({ content: posts.content, published: posts.published })
@@ -82,18 +85,16 @@ export async function getPostBySlug(slug: string): Promise<PostDetail | null> {
   };
 }
 
-/** 카테고리별 글 목록 (카테고리 이름순) */
-export async function getPostsByCategory(): Promise<
-  { name: string; posts: PostSummary[] }[]
-> {
+/** 태그별 글 목록 (태그 이름순) */
+export async function getPostsByTag(): Promise<{ name: string; posts: PostSummary[] }[]> {
   "use cache";
   cacheLife("hours");
   cacheTag(POSTS_TAG);
 
   const groups = new Map<string, PostSummary[]>();
   for (const post of await getPublishedPosts()) {
-    for (const category of post.categories) {
-      groups.set(category, [...(groups.get(category) ?? []), post]);
+    for (const tag of post.tags) {
+      groups.set(tag, [...(groups.get(tag) ?? []), post]);
     }
   }
   return [...groups.entries()]

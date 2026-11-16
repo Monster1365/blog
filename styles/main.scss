@@ -18,6 +18,7 @@
 // 4. Components
 @use "components/btn";
 @use "components/card";
+@use "components/comments";
 @use "components/form";
 @use "components/label";
 @use "components/pagination";
@@ -26,3 +27,4 @@
 // 5. Page-specific styles
 @use "pages/page";
 @use "pages/post";
+@use "pages/admin";

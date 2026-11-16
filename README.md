@@ -53,6 +53,9 @@ npm run db:studio     # Drizzle Studio로 데이터 보기
 | 이름 | 필수 | 내용 |
 | --- | --- | --- |
 | `DATABASE_URL` | 필수 | Neon 연결 문자열 |
+| `AUTH_SECRET` | 관리 페이지 필수 | 관리자 세션 쿠키 서명용 비밀값 (32자 이상) |
+| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | 관리 페이지 필수 | GitHub OAuth App. 콜백 주소: `<사이트 주소>/api/auth/github/callback` |
+| `ADMIN_GITHUB_LOGIN` | 선택 | 관리자로 허용할 GitHub 아이디 (기본값 `Monster1365`) |
 | `RESEND_API_KEY` | Production 필수 | Contact 메일 발송용 Resend API 키 (로컬에서 비우면 발송 생략) |
 | `CONTACT_TO_EMAIL` | Production 필수 | Contact 메시지를 받을 주소 |
 | `CONTACT_FROM_EMAIL` | 선택 | 보내는 주소 (기본값: Resend 테스트 주소) |
@@ -61,9 +64,11 @@ npm run db:studio     # Drizzle Studio로 데이터 보기
 ## 디렉토리 구조
 
 ```
-app/            # 페이지와 Server Action (홈, 글 상세 /[slug], categories, about, contact)
-components/     # Header, Footer, Hero, PostCard, ContactForm 등
-lib/            # 데이터 조회(posts), 마크다운 변환, Contact 처리, 사이트 설정
+app/            # 페이지와 Server Action (홈, 글 상세 /[slug], tags, about, contact)
+app/admin/      # 관리 페이지 (글·태그·댓글 관리, GitHub 로그인 필요)
+app/api/auth/   # GitHub 로그인 (OAuth 시작·콜백)
+components/     # Header, Footer, Hero, PostCard, Comments, ContactForm, admin/ 등
+lib/            # 데이터 조회(posts, admin), 댓글, 로그인(auth), 마크다운 변환, Contact 처리, 사이트 설정
 db/             # Drizzle 스키마·클라이언트·마이그레이션
 styles/         # Sass (Sleek 테마 구조: abstracts / base / components / layout / pages)
 content/        # About 페이지 마크다운
@@ -74,20 +79,26 @@ public/images/  # 대표 이미지
 
 이전 단계(Jekyll → Next.js 전환, Neon 이관, Vercel 배포, Resend Contact)는 모두 끝났습니다.
 
-### 관리 페이지
-- [ ] GitHub 로그인 (Monster1365 계정만 허용)
-- [ ] 글 목록 (숨긴 글 포함), 태그로 걸러 보기
-- [ ] 글 작성·수정·삭제
-- [ ] 글 숨기기·다시 보이기
-- [ ] 태그 정리 (이름 바꾸기, 삭제, 태그별 글 수)
-- [ ] 댓글 목록과 삭제
-- [ ] 글·댓글을 바꾸면 사이트에 바로 반영 (`updateTag`)
+### 관리 페이지 (`/admin`)
+- [x] GitHub 로그인 (Monster1365 계정만 허용, 서명된 세션 쿠키 7일)
+- [x] 글 목록 (숨긴 글 포함), 태그로 걸러 보기
+- [x] 글 작성·수정·삭제 (삭제하면 댓글도 함께 삭제)
+- [x] 글 숨기기·다시 보이기
+- [x] 태그 정리 (이름 바꾸기·합치기, 삭제, 태그별 글 수)
+- [x] 댓글 목록과 삭제
+- [x] 글을 바꾸면 사이트에 바로 반영 (`updateTag`)
+- [ ] GitHub OAuth App 만들기 (Production용, Preview용 각각) + Vercel 환경 변수 등록
+- [ ] 이미지 업로드 (지금은 `public/images/posts/`에 파일을 넣고 이름을 적는 방식)
+- [ ] 본문 미리보기
 
 ### 댓글
-- [ ] 글마다 댓글 달기 (바로 게시)
-- [ ] 작성자 표시: 같은 글 안에서 브라우저별로 익명1, 익명2…, 관리자는 "글쓴이"
-- [ ] 스팸 방지 (허니팟, 요청 횟수 제한)
-- [ ] 삭제는 관리 페이지에서 관리자만
+- [x] 글마다 댓글 달기 (바로 게시)
+- [x] 작성자 표시: 같은 글 안에서 브라우저별로 익명1, 익명2…, 관리자는 "글쓴이"
+- [x] 스팸 방지 (허니팟, 2초 이내 제출 차단, 같은 IP 10분에 5개·사이트 전체 1시간에 100개)
+- [x] 삭제는 관리 페이지에서 관리자만
+- [x] 댓글은 요청마다 읽어서 항상 최신 상태로 표시 (글 본문은 미리 만든 페이지)
+- [x] Neon `develop`에 `comments`, `comment_participants` 마이그레이션 적용
+- [ ] Neon `main`에 마이그레이션 적용 (main에 합치기 전)
 
 ### 사이트
 - [ ] 홈 글 목록 페이지네이션 (글이 늘어나면)

@@ -1,0 +1,134 @@
+@use "../abstracts" as *;
+
+// 글 아래 댓글
+.comments {
+  padding: 3rem 0 4rem;
+  background-color: $light-bg-color;
+  border-top: 1px solid $border;
+}
+
+.comments__inner {
+  padding-top: 0;
+
+  @include breakpoint($md) {
+    padding-top: 0;
+  }
+}
+
+.comments__title {
+  margin-bottom: 1.5rem;
+  font-size: 1.25rem;
+
+  span {
+    color: $primary;
+  }
+
+  .comments__loading {
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: $grey;
+  }
+}
+
+.comments__empty {
+  color: $grey;
+}
+
+.comments__list {
+  margin: 0 0 2rem;
+  padding: 0;
+  list-style: none;
+}
+
+.comment {
+  padding: 1rem 0;
+  border-bottom: 1px solid $border;
+
+  &:first-child {
+    border-top: 1px solid $border;
+  }
+}
+
+.comment__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 0.375rem;
+  font-size: 0.8125rem;
+  color: $grey;
+}
+
+.comment__author {
+  font-weight: 700;
+  color: $heading-color;
+
+  &.--author {
+    padding: 0 0.5rem;
+    color: $bg-color;
+    background-color: $primary;
+    border-radius: 100px;
+  }
+}
+
+.comment__body {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.comment-form {
+  textarea {
+    resize: vertical;
+    background-color: $bg-color;
+    padding: 0.5rem;
+    border: 1px solid $border;
+    border-bottom-width: 2px;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    color: $heading-color;
+  }
+
+  .form__input {
+    margin-bottom: 1rem;
+  }
+}
+
+.comment-form__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  .contact-form__status {
+    margin: 0;
+  }
+}
+
+// 태그 페이지 상단 태그 목록
+.tag-index {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.tag-index__item {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+  border: 1px solid $border;
+  border-radius: 100px;
+
+  span {
+    color: $grey;
+  }
+
+  &:hover,
+  &:focus {
+    border: 1px solid $primary;
+  }
+}

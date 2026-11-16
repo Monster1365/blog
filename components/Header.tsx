@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 type NavItem = { name: string; href: string };
@@ -22,18 +21,12 @@ export default function Header({
   title: string;
   navigation: readonly NavItem[];
 }) {
-  const pathname = usePathname();
+  // usePathname()을 쓰지 않습니다: 주소를 미리 알 수 없는 페이지(관리 페이지 등)의
+  // 정적 렌더링을 막기 때문입니다. 모바일 메뉴는 링크를 누를 때 닫습니다.
   const [open, setOpen] = useState(false);
   const [fixed, setFixed] = useState(false);
   const [hidden, setHidden] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
-
-  // 페이지가 바뀌면 모바일 메뉴 닫기
-  const [lastPath, setLastPath] = useState(pathname);
-  if (pathname !== lastPath) {
-    setLastPath(pathname);
-    setOpen(false);
-  }
 
   useEffect(() => {
     let previousScroll = window.scrollY;
@@ -105,7 +98,6 @@ export default function Header({
                     key={item.href}
                     className="header__link"
                     href={item.href}
-                    aria-current={pathname === item.href ? "page" : undefined}
                     onClick={() => setOpen(false)}
                   >
                     <span>{item.name}</span>

@@ -15,6 +15,13 @@
       "when": 1794827008784,
       "tag": "0001_daffy_jubilee",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794829833067,
+      "tag": "0002_milky_lady_vermin",
+      "breakpoints": true
     }
   ]
 }

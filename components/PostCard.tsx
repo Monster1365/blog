@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import CategoryLabels from "@/components/CategoryLabels";
+import TagLabels from "@/components/TagLabels";
 import { featuredImageSrc, formatDate, truncate, truncateWords } from "@/lib/format";
 import type { PostSummary } from "@/lib/posts";
 
@@ -15,9 +15,9 @@ export default function PostCard({
 
   return (
     <article className="post-card">
-      {post.categories.length > 0 && (
+      {post.tags.length > 0 && (
         <span className="post-card__label">
-          <CategoryLabels categories={post.categories} />
+          <TagLabels tags={post.tags} />
         </span>
       )}
       <Link href={href} tabIndex={-1} aria-hidden="true">

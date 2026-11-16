@@ -1,24 +1,33 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SmallHero } from "@/components/Hero";
-import { formatDate, slugifyCategory } from "@/lib/format";
-import { getPostsByCategory } from "@/lib/posts";
+import { formatDate, slugify } from "@/lib/format";
+import { getPostsByTag } from "@/lib/posts";
 
-export const metadata: Metadata = { title: "Categories" };
+export const metadata: Metadata = { title: "Tags" };
 
-export default async function CategoriesPage() {
-  const groups = await getPostsByCategory();
+export default async function TagsPage() {
+  const groups = await getPostsByTag();
 
   return (
     <>
-      <SmallHero title="Categories" />
+      <SmallHero title="Tags" />
       <main className="site__content">
         <div className="container">
           <div className="page-content">
-            {groups.length === 0 && <p className="empty-state">아직 카테고리가 없습니다.</p>}
+            {groups.length === 0 && <p className="empty-state">아직 태그가 없습니다.</p>}
+            {groups.length > 0 && (
+              <nav className="tag-index" aria-label="태그 목록">
+                {groups.map(({ name, posts }) => (
+                  <a key={name} className="tag-index__item" href={`#${slugify(name)}`}>
+                    {name} <span>{posts.length}</span>
+                  </a>
+                ))}
+              </nav>
+            )}
             {groups.map(({ name, posts }) => (
               <section key={name} className="archive-group">
-                <h3 id={slugifyCategory(name)} className="category-head">
+                <h3 id={slugify(name)} className="category-head">
                   {name}
                 </h3>
                 {posts.map((post) => (
