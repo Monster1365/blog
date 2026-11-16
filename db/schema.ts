@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import {
   boolean,
+  customType,
   index,
   integer,
   pgTable,
@@ -90,6 +91,56 @@ export const comments = pgTable(
 );
 
 export type Comment = typeof comments.$inferSelect;
+
+/** PostgreSQL bytea ↔ Buffer (Neon HTTP 드라이버는 Buffer로 돌려줍니다) */
+const bytea = customType<{ data: Buffer; driverData: string | Buffer }>({
+  dataType: () => "bytea",
+  toDriver: (value) => `\\x${value.toString("hex")}`,
+  fromDriver: (value) =>
+    Buffer.isBuffer(value)
+      ? value
+      : Buffer.from(String(value).replace(/^\\x/, ""), "hex"),
+});
+
+/** 관리 페이지에서 올린 이미지 (글 썸네일). /media/<id> 로 보여 줍니다. */
+export const images = pgTable("images", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  mimeType: text("mime_type").notNull(),
+  data: bytea().notNull(),
+  byteSize: integer("byte_size").notNull(),
+  width: integer(),
+  height: integer(),
+  /** 올릴 때의 원래 파일 이름 (참고용) */
+  originalName: text("original_name"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+/**
+ * 방문 기록 (대시보드 통계용).
+ * IP·브라우저 정보를 그대로 저장하지 않고, 하루마다 바뀌는 해시(visitorHash)만 남깁니다.
+ */
+export const pageViews = pgTable(
+  "page_views",
+  {
+    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    path: text().notNull(),
+    /** 글 페이지면 글 id */
+    postId: integer("post_id").references(() => posts.id, { onDelete: "set null" }),
+    visitorHash: text("visitor_hash").notNull(),
+    /** 어디서 들어왔는지 (호스트 이름만) */
+    referrer: text(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("page_views_created_idx").on(t.createdAt),
+    index("page_views_visitor_path_created_idx").on(t.visitorHash, t.path, t.createdAt),
+    index("page_views_post_idx").on(t.postId, t.createdAt),
+  ],
+);
 
 export type Post = typeof posts.$inferSelect;
 export type NewPost = typeof posts.$inferInsert;

@@ -67,12 +67,14 @@ npm run db:studio     # Drizzle Studio로 데이터 보기
 app/            # 페이지와 Server Action (홈, 글 상세 /[slug], tags, about, contact)
 app/admin/      # 관리 페이지 (글·태그·댓글 관리, GitHub 로그인 필요)
 app/api/auth/   # GitHub 로그인 (OAuth 시작·콜백)
+app/api/views/  # 방문 기록 받기 (대시보드 통계)
+app/media/      # DB에 저장한 이미지 보내기
 components/     # Header, Footer, Hero, PostCard, Comments, ContactForm, admin/ 등
 lib/            # 데이터 조회(posts, admin), 댓글, 로그인(auth), 마크다운 변환, Contact 처리, 사이트 설정
 db/             # Drizzle 스키마·클라이언트·마이그레이션
 styles/         # Sass (Sleek 테마 구조: abstracts / base / components / layout / pages)
 content/        # About 페이지 마크다운
-public/images/  # 대표 이미지
+public/images/  # 기본 대표 이미지 (관리 페이지에서 올린 이미지는 DB `images` 테이블 → /media/<id>)
 ```
 
 ## 할 일
@@ -87,9 +89,15 @@ public/images/  # 대표 이미지
 - [x] 태그 정리 (이름 바꾸기·합치기, 삭제, 태그별 글 수)
 - [x] 댓글 목록과 삭제
 - [x] 글을 바꾸면 사이트에 바로 반영 (`updateTag`)
-- [ ] GitHub OAuth App 만들기 (Production용, Preview용 각각) + Vercel 환경 변수 등록
-- [ ] 이미지 업로드 (지금은 `public/images/posts/`에 파일을 넣고 이름을 적는 방식)
-- [ ] 본문 미리보기
+- [x] GitHub OAuth App 만들기 (Production용, Preview용 각각) + Vercel 환경 변수 등록
+- [x] 썸네일 끌어다 놓기 업로드 (브라우저에서 1600px WebP로 줄여 `images` 테이블에 저장, `/media/<id>`로 표시)
+- [x] 본문 미리보기 (사이트와 같은 변환기)
+- [x] Markdown 파일 불러오기 (버튼 또는 본문 칸에 끌어다 놓기, front matter로 제목·태그·요약 채움)
+- [x] 대시보드 (`/admin`): 글·댓글·태그 수, 발행 주기, 월별 발행, 일별 방문자, 인기 글, 유입 경로
+- [x] 방문 기록 (`page_views`): IP 대신 하루마다 바뀌는 해시만 저장, 봇·관리자·30분 안 재방문 제외
+- [ ] 쓰지 않는 이미지 정리 (썸네일을 바꾸거나 글을 지워도 예전 이미지는 남아 있음)
+- [ ] 본문 안에 이미지 넣기 (지금은 썸네일만 업로드 가능)
+- [ ] Neon `main`에 `images`, `page_views` 마이그레이션 적용 (main에 합치기 전)
 
 ### 댓글
 - [x] 글마다 댓글 달기 (바로 게시)

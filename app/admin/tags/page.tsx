@@ -49,7 +49,7 @@ async function AdminTags() {
               {tags.map((tag) => (
                 <tr key={tag.name}>
                   <td>
-                    <Link href={`/admin?tag=${encodeURIComponent(tag.name)}`}>{tag.name}</Link>
+                    <Link href={`/admin/posts?tag=${encodeURIComponent(tag.name)}`}>{tag.name}</Link>
                   </td>
                   <td>
                     {tag.total}

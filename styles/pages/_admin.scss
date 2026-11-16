@@ -375,3 +375,502 @@
   font-size: 0.8125rem;
   color: $grey;
 }
+
+// 화면에는 숨기고 스크린리더에는 읽히게
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+// 썸네일 끌어다 놓기
+.thumb-drop {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 16 / 9;
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+  text-align: center;
+  background-color: $light-bg-color;
+  border: 2px dashed $outline;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+
+  &:hover,
+  &:focus-visible,
+  &.--dragging {
+    border-color: $primary;
+    background-color: rgba(39, 124, 234, 0.06);
+    outline: 0;
+  }
+
+  &[aria-busy="true"] {
+    cursor: progress;
+  }
+}
+
+.thumb-drop__image {
+  object-fit: cover;
+}
+
+.thumb-drop__hint {
+  position: relative;
+  z-index: 1;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.8125rem;
+  color: $grey;
+
+  .thumb-drop.--has-image & {
+    color: $bg-color;
+    background-color: rgba(52, 56, 81, 0.75);
+    border-radius: 100px;
+  }
+}
+
+.thumb-drop__row {
+  display: flex;
+  gap: 0.5rem;
+
+  input {
+    flex: 1;
+  }
+}
+
+// 본문 작성 / 미리보기
+.editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.editor-tabs {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.editor-tab {
+  padding: 0.25rem 0.875rem;
+  font: inherit;
+  font-size: 0.875rem;
+  color: $grey;
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+
+  &[aria-selected="true"] {
+    font-weight: 700;
+    color: $heading-color;
+    border-bottom-color: $primary;
+  }
+}
+
+.admin-form__content.--dropping {
+  border-color: $primary;
+  background-color: rgba(39, 124, 234, 0.04);
+}
+
+.editor-preview {
+  min-height: 24rem;
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid $outline;
+  border-radius: 4px;
+
+  .post-body {
+    padding-bottom: 0;
+  }
+}
+
+// ── 대시보드 ──────────────────────────────────
+.dashboard {
+  // 차트 색은 역할 이름으로만 씁니다 (계열 1개: 파랑)
+  --viz-surface: #{$bg-color};
+  --viz-accent: #2a78d6;
+  --viz-accent-wash: rgba(42, 120, 214, 0.1);
+  --viz-grid: #{$border};
+  --viz-text: #{$heading-color};
+  --viz-text-muted: #{$grey};
+  --viz-good: #{color.adjust($success, $lightness: -30%)};
+  --viz-bad: #{$error};
+
+  display: grid;
+  gap: 3rem;
+
+  section {
+    display: grid;
+    gap: 1.25rem;
+  }
+}
+
+.dashboard__heading {
+  margin: 0;
+  font-size: 1.25rem;
+
+  span {
+    margin-left: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: $grey;
+  }
+}
+
+.dashboard__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.dashboard__footnote {
+  margin: -0.5rem 0 0;
+  font-size: 0.75rem;
+  color: $grey;
+}
+
+.range-picker {
+  display: inline-flex;
+  padding: 2px;
+  background-color: $light-bg-color;
+  border: 1px solid $border;
+  border-radius: 6px;
+}
+
+.range-picker__item {
+  padding: 0.25rem 0.875rem;
+  font-size: 0.8125rem;
+  color: $text-color;
+  border: 0;
+  border-radius: 4px;
+
+  &:hover,
+  &:focus {
+    color: $primary;
+    border: 0;
+  }
+
+  &.--active {
+    font-weight: 700;
+    color: $heading-color;
+    background-color: $bg-color;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  }
+}
+
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 0.75rem;
+}
+
+.stat-tile {
+  padding: 1rem 1.125rem;
+  background-color: var(--viz-surface);
+  border: 1px solid $border;
+  border-radius: 8px;
+
+  &.--hero {
+    grid-column: span 2;
+    background-color: $light-bg-color;
+
+    .stat-tile__value {
+      font-size: 3rem;
+    }
+
+    @media (max-width: 30em) {
+      grid-column: auto;
+    }
+  }
+}
+
+.stat-tile__label {
+  font-size: 0.8125rem;
+  color: var(--viz-text-muted);
+}
+
+.stat-tile__value {
+  margin-top: 0.125rem;
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--viz-text);
+}
+
+.stat-tile__unit {
+  margin-left: 0.125rem;
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--viz-text-muted);
+}
+
+.stat-tile__note,
+.stat-tile__delta {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--viz-text-muted);
+}
+
+.stat-tile__delta {
+  &.--up span:first-child {
+    color: var(--viz-good);
+  }
+
+  &.--down span:first-child {
+    color: var(--viz-bad);
+  }
+}
+
+.stat-tile__vs {
+  color: var(--viz-text-muted);
+}
+
+.viz-card {
+  padding: 1.25rem 1.25rem 1rem;
+  background-color: var(--viz-surface);
+  border: 1px solid $border;
+  border-radius: 8px;
+  min-width: 0;
+}
+
+.viz-card__title {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.viz-card__subtitle {
+  margin: 0.125rem 0 1rem;
+  font-size: 0.75rem;
+  color: var(--viz-text-muted);
+}
+
+.viz-grid-2 {
+  display: grid;
+  gap: 1.25rem;
+
+  @include breakpoint($md) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.viz-chart {
+  position: relative;
+  width: 100%;
+  outline: 0;
+
+  &:focus-visible {
+    box-shadow: 0 0 0 2px var(--viz-accent);
+    border-radius: 4px;
+  }
+
+  svg {
+    display: block;
+    overflow: visible;
+  }
+}
+
+.viz-grid {
+  stroke: var(--viz-grid);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.viz-tick {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  fill: var(--viz-text-muted);
+}
+
+.viz-end-label {
+  font-size: 12px;
+  font-weight: 600;
+  fill: var(--viz-text);
+}
+
+.viz-line {
+  fill: none;
+  stroke: var(--viz-accent);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.viz-area {
+  fill: var(--viz-accent-wash);
+}
+
+.viz-dot {
+  fill: var(--viz-accent);
+  stroke: var(--viz-surface);
+  stroke-width: 2;
+}
+
+.viz-crosshair {
+  stroke: var(--viz-text-muted);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.viz-bar {
+  fill: var(--viz-accent);
+  transition: opacity 0.1s ease;
+
+  &.--active {
+    opacity: 0.75;
+  }
+}
+
+.viz-hit {
+  fill: transparent;
+  cursor: crosshair;
+}
+
+.viz-tooltip {
+  position: absolute;
+  z-index: 2;
+  min-width: 8rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  white-space: nowrap;
+  pointer-events: none;
+  color: var(--viz-text);
+  background-color: var(--viz-surface);
+  border: 1px solid $border;
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transform: translate(-50%, -100%);
+}
+
+.viz-tooltip__title {
+  margin-bottom: 0.125rem;
+  color: var(--viz-text-muted);
+}
+
+.viz-tooltip__row {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+
+  strong {
+    font-size: 0.875rem;
+  }
+
+  &.--muted {
+    padding-left: 1rem;
+    color: var(--viz-text-muted);
+  }
+}
+
+.viz-key {
+  display: inline-block;
+  width: 10px;
+  background-color: var(--viz-accent);
+
+  &.--line {
+    height: 2px;
+    border-radius: 1px;
+  }
+
+  &.--bar {
+    height: 10px;
+    border-radius: 2px;
+  }
+}
+
+.viz-table {
+  margin-top: 0.75rem;
+  font-size: 0.8125rem;
+
+  summary {
+    color: var(--viz-text-muted);
+    cursor: pointer;
+  }
+
+  .admin-table {
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+  }
+
+  td.--num {
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+}
+
+.viz-empty {
+  padding: 2rem 0;
+  margin: 0;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--viz-text-muted);
+}
+
+.ranked-bars {
+  display: grid;
+  gap: 0.875rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ranked-bars__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "name value"
+    "bar bar";
+  gap: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.ranked-bars__name {
+  grid-area: name;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  a {
+    color: var(--viz-text);
+    border-bottom: 0;
+
+    &:hover {
+      color: $primary;
+    }
+  }
+}
+
+.ranked-bars__value {
+  grid-area: value;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--viz-text);
+
+  span {
+    font-weight: 400;
+    color: var(--viz-text-muted);
+  }
+}
+
+.ranked-bars__track {
+  grid-area: bar;
+}
+
+.ranked-bars__bar {
+  height: 8px;
+  background-color: var(--viz-accent);
+  border-radius: 0 4px 4px 0;
+}

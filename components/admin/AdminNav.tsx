@@ -5,7 +5,8 @@ import { usePathname } from "next/navigation";
 import { logout } from "@/app/admin/actions";
 
 const links = [
-  { href: "/admin", label: "글" },
+  { href: "/admin", label: "대시보드" },
+  { href: "/admin/posts", label: "글" },
   { href: "/admin/posts/new", label: "새 글" },
   { href: "/admin/tags", label: "태그" },
   { href: "/admin/comments", label: "댓글" },

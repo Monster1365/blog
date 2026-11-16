@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
+import PageViewTracker from "@/components/PageViewTracker";
 import { site, siteUrl } from "@/lib/site";
 import "@/styles/main.scss";
 
@@ -25,6 +27,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Header title={site.shortTitle} navigation={site.navigation} />
         {children}
         <Footer />
+        {/* usePathname()을 쓰므로 Suspense 안에 둡니다. */}
+        <Suspense fallback={null}>
+          <PageViewTracker />
+        </Suspense>
       </body>
     </html>
   );

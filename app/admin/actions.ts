@@ -9,6 +9,8 @@ import { comments, posts } from "@/db/schema";
 import { getPostForAdmin, isSlugTaken, postsWithTag } from "@/lib/admin";
 import { SESSION_COOKIE, requireAdmin } from "@/lib/auth";
 import { makeExcerpt, parseTags, slugify } from "@/lib/format";
+import { IMAGE_LIMITS, saveImage } from "@/lib/images";
+import { renderMarkdown } from "@/lib/markdown";
 import { POSTS_TAG, postTag } from "@/lib/posts";
 
 /** 공개 페이지 캐시를 비워 바뀐 내용이 바로 보이게 합니다. */
@@ -18,7 +20,7 @@ function refreshPublic(...slugs: (string | null | undefined)[]) {
 }
 
 const RESERVED_SLUGS = new Set([
-  "admin", "api", "tags", "categories", "about", "contact", "_next", "favicon.ico", "images",
+  "admin", "api", "tags", "categories", "about", "contact", "_next", "favicon.ico", "images", "media",
 ]);
 const SLUG_RE = /^[\p{L}\p{N}]+(?:-[\p{L}\p{N}]+)*$/u;
 const IMAGE_RE = /^(?:[\w.-]+|\/[\w./-]+)$/;
@@ -124,7 +126,7 @@ export async function savePost(_prev: PostFormState, formData: FormData): Promis
     refreshPublic(slug);
   }
 
-  redirect("/admin");
+  redirect("/admin/posts");
 }
 
 function idFrom(formData: FormData): number {
@@ -155,7 +157,7 @@ export async function deletePost(formData: FormData) {
 
   await db.delete(posts).where(eq(posts.id, post.id));
   refreshPublic(post.slug);
-  redirect("/admin");
+  redirect("/admin/posts");
 }
 
 /** 모든 글에서 태그 이름 바꾸기 (이미 새 이름이 붙은 글은 하나로 합칩니다) */
@@ -207,4 +209,48 @@ export async function logout() {
   const store = await cookies();
   store.delete(SESSION_COOKIE);
   redirect("/");
+}
+
+export type UploadResult = { ok: true; url: string } | { ok: false; message: string };
+
+/** 썸네일 이미지 업로드 → images 테이블에 저장하고 /media/<id> 주소를 돌려줍니다. */
+export async function uploadImage(formData: FormData): Promise<UploadResult> {
+  await requireAdmin();
+
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) {
+    return { ok: false, message: "이미지 파일을 골라 주세요." };
+  }
+  if (!(IMAGE_LIMITS.types as readonly string[]).includes(file.type)) {
+    return { ok: false, message: "JPG, PNG, WebP, GIF 이미지만 올릴 수 있습니다." };
+  }
+  if (file.size > IMAGE_LIMITS.maxBytes) {
+    return { ok: false, message: "이미지는 3MB 이하만 올릴 수 있습니다." };
+  }
+
+  const toInt = (v: FormDataEntryValue | null) => {
+    const n = Number(v);
+    return Number.isInteger(n) && n > 0 && n < 20000 ? n : undefined;
+  };
+
+  try {
+    const saved = await saveImage({
+      data: Buffer.from(await file.arrayBuffer()),
+      mimeType: file.type,
+      width: toInt(formData.get("width")),
+      height: toInt(formData.get("height")),
+      originalName: String(formData.get("originalName") ?? file.name),
+    });
+    return { ok: true, url: saved.url };
+  } catch (err) {
+    console.error("[admin] 이미지 저장 실패", err);
+    return { ok: false, message: "이미지를 저장하지 못했습니다. 잠시 후 다시 시도해 주세요." };
+  }
+}
+
+/** 글쓰기 미리보기: 사이트와 같은 변환기로 마크다운을 HTML로 바꿉니다. */
+export async function previewMarkdown(markdown: string): Promise<string> {
+  await requireAdmin();
+  if (typeof markdown !== "string" || markdown.length > 500_000) return "";
+  return renderMarkdown(markdown);
 }
