@@ -2,9 +2,8 @@
 title: Blog # your site title
 author: SeoHyun Han # You :P
 description: > # Meta description of Homepage
-  Write an awesome description for your new site here. You can edit this
-  line in _config.yml. It will appear in your document head meta (for
-  Google search results) and in your feed.xml site description.
+  SeoHyun Han's dev blog — documenting what I learn, build, and discover
+  through hands-on development, including game development with Ren'Py and Python.
 baseurl: "/blog" # the subpath of your site, e.g. /blog
 url: "https://monster1365.github.io/" # the base hostname & protocol for your site, e.g. http://example.com
 
@@ -12,7 +11,6 @@ url: "https://monster1365.github.io/" # the base hostname & protocol for your si
 social:
   name: SeoHyun Han
   links:
-    - https://www.linkedin.com/in/BenBalter
     - https://github.com/Monster1365
 
 # THEME SETTINGS
