@@ -104,11 +104,14 @@ categories: [Renpy, Game, Python]
 ### 1. Next.js 골격
 - [x] Next.js 프로젝트 생성 (App Router, TypeScript)
 - [x] 겹치는 Jekyll 빌드 설정 제거 (`.babelrc`, `gulpfile.babel.js`, `package-lock.json`, `.eslintrc`, `.eslintignore`)
-- [ ] 페이지 구성: 홈(글 목록·페이지네이션), 글 상세(`/[slug]`), 카테고리, About, Contact
+- [x] 페이지 구성: 홈(글 목록), 글 상세(`/[slug]`), 카테고리, About, Contact(준비 중 안내), 404
+- [ ] 홈 글 목록 페이지네이션 (글이 늘어나면)
 
 ### 2. 디자인 이식
-- [ ] `_sass/` 구조(abstracts / base / components / layout / pages)를 Next.js의 Sass로 옮기기
-- [ ] `_layouts/`, `_includes/`(header, footer, card, pagination)를 React 컴포넌트로 바꾸기
+- [x] `_sass/` 구조를 `styles/`로 옮기기 (`@import` → `@use`, 한글 폰트·줄바꿈 보완)
+- [x] `_layouts/`, `_includes/`를 React 컴포넌트로 바꾸기 (`components/`: Header, Footer, Hero, PostCard)
+- [x] jQuery 헤더 동작(모바일 메뉴, 스크롤 시 숨김)을 React로 옮기기
+- [ ] Contact 폼 스타일(`_btn.scss`, `_form.scss`) 옮기기 (6단계에서)
 - [ ] 메인 배경 이미지와 Ren'Py 글 대표 이미지를 직접 고른 이미지로 교체
 - [ ] 파비콘과 아이콘 교체
 
@@ -125,9 +128,10 @@ categories: [Renpy, Game, Python]
 - [ ] Neon `main` 브랜치로 이관 (Production 배포 전, 마이그레이션 적용 후)
 
 ### 5. 렌더링
-- [ ] 마크다운을 HTML로 변환 (remark/rehype), 코드 하이라이팅 (shiki)
-- [ ] 글 상세 페이지에 ISR(revalidate) 적용
-- [ ] 대표 이미지를 `public/`이나 Vercel Blob에 두고 `next/image`로 표시
+- [x] 마크다운을 HTML로 변환 (remark/rehype, GFM, 한글 강조 보완), 코드 하이라이팅 (shiki)
+- [x] `use cache` + `cacheLife("hours")` + `cacheTag("posts")`로 캐시 (1시간마다 갱신)
+- [ ] 글을 바꿨을 때 바로 반영하는 방법 만들기 (`revalidateTag("posts", "max")`를 부르는 API 등)
+- [x] 대표 이미지를 `public/images/posts/`에 두고 `next/image`로 표시
 
 ### 6. Contact (Resend)
 - [ ] Resend 가입, API 키 발급, 발신 도메인 인증

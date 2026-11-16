@@ -1,0 +1,26 @@
+@charset "UTF-8";
+
+// Sleek 테마(https://github.com/janczizikow/sleek, MIT)의 Sass를 옮겨온 스타일입니다.
+
+// 1. Vendors
+@use "vendor/normalize";
+
+// 2. Base
+@use "base/base";
+@use "base/typography";
+@use "base/helpers";
+
+// 3. Layout
+@use "layout/grid";
+@use "layout/nav";
+@use "layout/footer";
+
+// 4. Components
+@use "components/card";
+@use "components/label";
+@use "components/pagination";
+@use "components/table";
+
+// 5. Page-specific styles
+@use "pages/page";
+@use "pages/post";

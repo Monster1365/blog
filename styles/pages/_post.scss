@@ -1,0 +1,119 @@
+@use "../abstracts" as *;
+
+.post-content {
+  max-width: 52.5rem;
+  margin: 0 auto;
+  padding-top: 2.5em;
+
+  @include breakpoint($md) {
+    padding-top: 5em;
+  }
+}
+
+.comments {
+  padding: 50px 0;
+  background-color: #fafafa;
+}
+
+.controls__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.375rem 0 1.25rem;
+  border-top: 1px solid $border;
+
+  .prev {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .next {
+    align-items: flex-end;
+    text-align: right;
+  }
+}
+
+.controls__item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  span {
+    font-size: 0.875rem;
+    color: $grey;
+  }
+
+  a {
+    color: $heading-color;
+    font-weight: bold;
+    border-bottom: 0;
+
+    svg {
+      transition: all .2s linear;
+    }
+
+    &:hover {
+      color: $primary;
+      border-bottom: 0;
+
+      svg {
+        fill: $primary;
+      }
+    }
+  }
+}
+
+
+// 마크다운 본문 (remark/rehype 출력)
+.post-body {
+  padding-bottom: 2.5rem;
+  overflow-wrap: break-word;
+
+  h2,
+  h3,
+  h4 {
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  ul,
+  ol {
+    margin-top: 0;
+    margin-bottom: 1.25rem;
+    padding-left: 1.5rem;
+  }
+
+  li + li {
+    margin-top: 0.25rem;
+  }
+
+  // 항목 사이에 빈 줄이 있는 목록(loose list)은 <li> 안에 <p>가 생깁니다.
+  li > p {
+    margin-bottom: 0.5rem;
+  }
+
+  blockquote {
+    margin: 0 0 1.25rem;
+    padding: 0.25rem 1rem;
+    color: $grey;
+    border-left: 4px solid $border;
+  }
+
+  img {
+    display: block;
+    margin: 0 auto 1.25rem;
+  }
+
+  // shiki가 넣는 inline 배경색 대신 Sleek의 코드 배경색을 씁니다.
+  pre.shiki {
+    background-color: $code-bg-color !important;
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+}
+
+.controls__item a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
