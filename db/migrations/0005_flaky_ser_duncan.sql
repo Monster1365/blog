@@ -1,0 +1,1 @@
+ALTER TABLE "posts" ADD COLUMN "text_align" text DEFAULT 'left' NOT NULL;

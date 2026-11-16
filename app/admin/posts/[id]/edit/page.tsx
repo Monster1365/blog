@@ -57,6 +57,7 @@ async function EditPost({ params }: Pick<PageProps<"/admin/posts/[id]/edit">, "p
           featuredImg: post.featuredImg,
           content: post.content,
           published: post.published,
+          textAlign: post.textAlign,
         }}
       />
     </section>

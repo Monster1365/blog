@@ -22,6 +22,8 @@ export type PostSummary = {
 
 export type PostDetail = PostSummary & {
   html: string;
+  /** 본문 정렬: left | center | right | justify */
+  textAlign: string;
   readingMinutes: number;
   /** 바로 이전(더 오래된) 글 */
   previous: Pick<PostSummary, "slug" | "title"> | null;
@@ -63,7 +65,7 @@ export async function getPostBySlug(slug: string): Promise<PostDetail | null> {
   cacheTag(POSTS_TAG, postTag(slug));
 
   const [row] = await db
-    .select({ content: posts.content, published: posts.published })
+    .select({ content: posts.content, published: posts.published, textAlign: posts.textAlign })
     .from(posts)
     .where(eq(posts.slug, slug))
     .limit(1);
@@ -79,6 +81,7 @@ export async function getPostBySlug(slug: string): Promise<PostDetail | null> {
   return {
     ...list[index],
     html: await renderMarkdown(row.content),
+    textAlign: row.textAlign,
     readingMinutes: readingMinutes(row.content),
     previous: pick(list[index + 1]),
     next: pick(list[index - 1]),

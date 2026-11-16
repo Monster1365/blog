@@ -112,3 +112,40 @@
   align-items: center;
   gap: 0.5rem;
 }
+
+// 본문 정렬 (관리 페이지에서 글마다 선택, 기본은 왼쪽)
+.post-body {
+  &.--align-center,
+  &.--align-right {
+    // 목록 기호가 글과 떨어지지 않게 안쪽으로
+    ul,
+    ol {
+      padding-left: 0;
+      list-style-position: inside;
+    }
+  }
+
+  &.--align-center {
+    text-align: center;
+  }
+
+  &.--align-right {
+    text-align: right;
+
+    blockquote {
+      border-left: 0;
+      border-right: 4px solid $border;
+    }
+  }
+
+  &.--align-justify {
+    text-align: justify;
+    text-justify: inter-character;
+  }
+
+  // 코드와 표는 정렬과 상관없이 왼쪽 (줄 맞춤이 깨지지 않게)
+  pre,
+  table {
+    text-align: left;
+  }
+}

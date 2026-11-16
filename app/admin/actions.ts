@@ -9,6 +9,7 @@ import { comments, posts, siteSettings } from "@/db/schema";
 import { getPostForAdmin, isSlugTaken, postsWithTag } from "@/lib/admin";
 import { SESSION_COOKIE, requireAdmin } from "@/lib/auth";
 import { makeExcerpt, parseTags, slugify } from "@/lib/format";
+import { toTextAlign } from "@/lib/align";
 import { IMAGE_LIMITS, saveImage } from "@/lib/images";
 import { renderMarkdown } from "@/lib/markdown";
 import { POSTS_TAG, postTag } from "@/lib/posts";
@@ -33,7 +34,7 @@ export type PostFormState = {
   message?: string;
   fieldErrors?: Partial<Record<Field, string>>;
   /** 오류가 났을 때 입력값을 되돌려 주기 위함 (React 폼 액션은 제출 후 입력칸을 비웁니다) */
-  values?: Record<Field, string> & { published: boolean };
+  values?: Record<Field, string> & { published: boolean; textAlign: string };
   /** 오류가 날 때마다 바뀌는 값 (폼을 새로 그리는 key) */
   nonce?: number;
 };
@@ -54,6 +55,7 @@ export async function savePost(_prev: PostFormState, formData: FormData): Promis
   const excerptInput = get("excerpt").trim();
   const featuredImg = get("featuredImg").trim();
   const published = get("published") === "on";
+  const textAlign = toTextAlign(get("textAlign"));
 
   const fieldErrors: PostFormState["fieldErrors"] = {};
   if (!title) fieldErrors.title = "제목을 입력해 주세요.";
@@ -86,6 +88,7 @@ export async function savePost(_prev: PostFormState, formData: FormData): Promis
     featuredImg: get("featuredImg"),
     content: get("content"),
     published,
+    textAlign,
   };
 
   if (Object.keys(fieldErrors).length > 0) {
@@ -106,6 +109,7 @@ export async function savePost(_prev: PostFormState, formData: FormData): Promis
     excerpt: excerptInput || makeExcerpt(content),
     featuredImg: featuredImg || null,
     published,
+    textAlign,
   };
 
   if (id) {

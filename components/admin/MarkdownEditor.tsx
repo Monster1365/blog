@@ -68,6 +68,7 @@ export default function MarkdownEditor({
   placeholder = "Markdown으로 쓰세요. .md 파일이나 이미지를 여기로 끌어다 놓거나 붙여 넣어도 됩니다.",
   error,
   onFrontMatter,
+  previewClassName = "",
 }: {
   id: string;
   name: string;
@@ -79,6 +80,8 @@ export default function MarkdownEditor({
   error?: string;
   /** .md 파일을 불러왔을 때 front matter로 다른 칸을 채우고, 채운 칸 이름들을 돌려줍니다. */
   onFrontMatter?: (data: FrontMatter) => string[];
+  /** 미리보기 본문에 더할 클래스 (예: 정렬) */
+  previewClassName?: string;
 }) {
   const ref = useRef<HTMLTextAreaElement>(null);
   const mdFileRef = useRef<HTMLInputElement>(null);
@@ -259,7 +262,7 @@ export default function MarkdownEditor({
           {previewing ? (
             <p className="admin-empty">미리보기를 만드는 중…</p>
           ) : previewHtml ? (
-            <div className="post-body" dangerouslySetInnerHTML={{ __html: previewHtml }} />
+            <div className={`post-body${previewClassName}`} dangerouslySetInnerHTML={{ __html: previewHtml }} />
           ) : (
             <p className="admin-empty">본문이 비어 있습니다.</p>
           )}

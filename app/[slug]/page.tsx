@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import Comments from "@/components/Comments";
 import { Hero } from "@/components/Hero";
+import { alignClass } from "@/lib/align";
 import TagLabels from "@/components/TagLabels";
 import { featuredImageSrc, formatDate } from "@/lib/format";
 import { getPostBySlug, getPublishedPosts } from "@/lib/posts";
@@ -89,7 +90,7 @@ async function PostContent({ params }: Pick<PageProps<"/[slug]">, "params">) {
       <main className="site__content">
         <div className="container">
           <article
-            className="post-content post-body"
+            className={`post-content post-body${alignClass(post.textAlign)}`}
             dangerouslySetInnerHTML={{ __html: post.html }}
           />
 

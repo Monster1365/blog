@@ -28,6 +28,8 @@ export const posts = pgTable(
       .notNull()
       .default(sql`'{}'::text[]`),
     published: boolean().notNull().default(false),
+    /** 본문 정렬: left | center | right | justify */
+    textAlign: text("text_align").notNull().default("left"),
     publishedAt: timestamp("published_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
