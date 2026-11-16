@@ -24,10 +24,24 @@
 Node.js 20.9 이상이 필요합니다.
 
 ```shell
+cp .env.example .env.local   # DATABASE_URL 채우기
 npm install
 npm run dev      # http://localhost:3000
 npm run lint
 npm run build
+```
+
+### 데이터베이스 (Neon + Drizzle)
+
+- Neon 프로젝트 `blog` (싱가포르 리전, PostgreSQL 18)
+  - `main` 브랜치: Production용
+  - `develop` 브랜치: 개발용. 로컬 `.env.local`은 이 브랜치를 가리킵니다.
+- 스키마는 [db/schema.ts](db/schema.ts), 마이그레이션 파일은 `db/migrations/`에 있습니다.
+
+```shell
+npm run db:generate   # 스키마 변경 → 마이그레이션 SQL 생성
+npm run db:migrate    # .env.local의 DATABASE_URL에 마이그레이션 적용
+npm run db:studio     # Drizzle Studio로 데이터 보기
 ```
 
 ### master (Jekyll)
@@ -97,9 +111,11 @@ categories: [Renpy, Game, Python]
 - [ ] 파비콘과 아이콘 교체
 
 ### 3. Neon DB
-- [ ] Neon 프로젝트 생성, 개발용 브랜치 분리
-- [ ] Drizzle ORM + `@neondatabase/serverless` 설정
-- [ ] `posts` 테이블 만들기: `id`, `slug`(unique), `title`, `content`(markdown), `excerpt`, `featured_img`, `categories`(text[]), `published`, `published_at`, `created_at`, `updated_at`
+- [x] Neon 프로젝트 생성, 개발용 브랜치 분리
+- [x] Drizzle ORM + `@neondatabase/serverless` 설정
+- [x] `posts` 테이블 만들기: `id`, `slug`(unique), `title`, `content`(markdown), `excerpt`, `featured_img`, `categories`(text[]), `published`, `published_at`, `created_at`, `updated_at`
+- [x] `develop` 브랜치에 마이그레이션 적용
+- [ ] `main` 브랜치에 마이그레이션 적용 (Production 배포 전)
 
 ### 4. 글 이관
 - [ ] `_posts/*.md`의 front matter를 읽어 `posts` 테이블에 넣는 스크립트 작성 (gray-matter)
