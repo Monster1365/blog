@@ -111,7 +111,7 @@ categories: [Renpy, Game, Python]
 - [x] `_sass/` 구조를 `styles/`로 옮기기 (`@import` → `@use`, 한글 폰트·줄바꿈 보완)
 - [x] `_layouts/`, `_includes/`를 React 컴포넌트로 바꾸기 (`components/`: Header, Footer, Hero, PostCard)
 - [x] jQuery 헤더 동작(모바일 메뉴, 스크롤 시 숨김)을 React로 옮기기
-- [ ] Contact 폼 스타일(`_btn.scss`, `_form.scss`) 옮기기 (6단계에서)
+- [x] Contact 폼 스타일(`_btn.scss`, `_form.scss`) 옮기기
 - [ ] 메인 배경 이미지와 Ren'Py 글 대표 이미지를 직접 고른 이미지로 교체
 - [ ] 파비콘과 아이콘 교체
 
@@ -134,11 +134,15 @@ categories: [Renpy, Game, Python]
 - [x] 대표 이미지를 `public/images/posts/`에 두고 `next/image`로 표시
 
 ### 6. Contact (Resend)
-- [ ] Resend 가입, API 키 발급, 발신 도메인 인증
-- [ ] `/api/contact` Route Handler에서 Resend로 메일 발송
-- [ ] 스팸 방지 (허니팟 필드, Origin 검사, 요청 횟수 제한)
-- [ ] 페이지에 이메일 주소가 노출되지 않게 하기
-- [ ] Contact 페이지 본문 직접 작성
+- [x] Server Action(`app/contact/actions.ts`)에서 Resend로 메일 발송 (Next.js가 Origin을 검사해 CSRF 차단)
+- [x] 메시지를 `contact_messages` 테이블에 저장 (발송 상태 기록, IP는 HMAC 해시로만 저장)
+- [x] 스팸 방지: 허니팟 칸, 3초 이내 제출 차단, 같은 IP 10분에 3번·사이트 전체 1시간에 30번 제한
+- [x] 페이지에 받는 이메일 주소가 노출되지 않게 하기 (`CONTACT_TO_EMAIL`은 서버에서만 사용)
+- [x] Contact 페이지 본문 작성
+- [x] Neon `develop` 브랜치에 `contact_messages` 마이그레이션 적용
+- [ ] Vercel 환경 변수 등록: `RESEND_API_KEY`, `CONTACT_TO_EMAIL` (필수), `CONTACT_FROM_EMAIL`, `CONTACT_HASH_SECRET` (선택)
+- [ ] Resend에서 발신 도메인 인증 후 `CONTACT_FROM_EMAIL` 설정 (그 전에는 Resend 가입 이메일로만 받을 수 있음)
+- [ ] Neon `main` 브랜치에 `contact_messages` 마이그레이션 적용 (Production 배포 전)
 
 ### 7. 배포 (Vercel)
 - [x] Vercel 프로젝트(`blog`)를 GitHub 저장소와 연결 (함수 리전 `sin1`)

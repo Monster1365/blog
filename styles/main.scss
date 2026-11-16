@@ -16,7 +16,9 @@
 @use "layout/footer";
 
 // 4. Components
+@use "components/btn";
 @use "components/card";
+@use "components/form";
 @use "components/label";
 @use "components/pagination";
 @use "components/table";

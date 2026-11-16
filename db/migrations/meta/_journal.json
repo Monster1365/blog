@@ -8,6 +8,13 @@
       "when": 1794821549801,
       "tag": "0000_orange_leech",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794827008784,
+      "tag": "0001_daffy_jubilee",
+      "breakpoints": true
     }
   ]
 }
