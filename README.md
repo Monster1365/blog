@@ -17,7 +17,7 @@
 
 ## 로컬에서 실행하기
 
-> 위 기술 스택은 지금 배포 중인 `master`(Jekyll) 기준입니다. `develop` 브랜치는 Next.js로 옮기는 중입니다.
+> 위 기술 스택은 지금 배포 중인 `main`(Jekyll) 기준입니다. `develop` 브랜치는 Next.js로 옮기는 중입니다.
 
 ### develop (Next.js)
 
@@ -46,7 +46,7 @@ npm run db:import-posts             # _posts/*.md를 posts 테이블로 옮기�
 npm run db:import-posts -- --dry-run  # DB에 쓰지 않고 변환 결과만 확인
 ```
 
-### master (Jekyll)
+### main (Jekyll)
 
 ```shell
 bundle install
@@ -91,7 +91,7 @@ categories: [Renpy, Game, Python]
 
 ## 할 일
 
-> 블로그를 **Next.js + Vercel + Neon PostgreSQL**로 옮기는 중입니다. 작업은 `develop` 브랜치에서 진행하고, 전환이 끝나면 `master`에 합칩니다.
+> 블로그를 **Next.js + Vercel + Neon PostgreSQL**로 옮기는 중입니다. 작업은 `develop` 브랜치에서 진행하고, 전환이 끝나면 `main`에 합칩니다.
 
 ### 사이트 기본 정리
 - [x] 테마 샘플 글 삭제
@@ -142,10 +142,12 @@ categories: [Renpy, Game, Python]
 
 ### 7. 배포 (Vercel)
 - [x] Vercel 프로젝트(`blog`)를 GitHub 저장소와 연결 (함수 리전 `sin1`)
-- [x] Next.js 파일이 없는 브랜치는 빌드 건너뛰기 (`test ! -f next.config.ts`, Jekyll인 master 빌드 실패 방지)
+- [x] Next.js 파일이 없는 브랜치는 빌드 건너뛰기 (`test ! -f next.config.ts`, Jekyll인 main 빌드 실패 방지)
 - [x] `DATABASE_URL` 등록 (Preview → Neon `develop`, Production → Neon `main`)
 - [ ] `RESEND_API_KEY` 등록 (6단계에서)
-- [ ] `develop`은 Preview, `master`는 Production으로 배포
+- [x] 기본 브랜치를 `master` → `main`으로 변경
+- [x] `develop`은 Preview로 배포
+- [ ] `main`을 Production으로 배포 (전환 마무리 때 develop을 합친 뒤)
 - [ ] 공개 전에 Production의 Vercel Authentication(배포 보호) 끄기
 
 ### 8. 전환 마무리
