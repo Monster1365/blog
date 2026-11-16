@@ -2,7 +2,7 @@
 
 직접 만들고 부딪히며 배운 것을 기록하는 개발 블로그입니다.
 
-- 사이트: https://monster1365.github.io/blog
+- 사이트: https://monster1365.github.io/blog (Jekyll, 전환 후 https://k-coding-blog.vercel.app)
 - 기반 테마: [Sleek](https://github.com/janczizikow/sleek) (Jekyll, MIT License)
 
 ## 기술 스택
@@ -152,7 +152,8 @@ categories: [Renpy, Game, Python]
 - [x] 기본 브랜치를 `master` → `main`으로 변경
 - [x] `develop`은 Preview로 배포
 - [ ] `main`을 Production으로 배포 (전환 마무리 때 develop을 합친 뒤)
-- [ ] 공개 전에 Production의 Vercel Authentication(배포 보호) 끄기
+- [x] Vercel 도메인 연결: Production `k-coding-blog.vercel.app`, develop `dev-k-coding-blog.vercel.app`
+- [x] 배포 보호를 Preview에만 적용 (Production은 공개, Preview는 Vercel 로그인 필요)
 
 ### 8. 전환 마무리
 - [ ] Jekyll 관련 파일 삭제 (`_config.yml`, `_layouts/`, `_includes/`, `Gemfile`, gemspec, Gulp 설정, `sw.js`, `.travis.yml`, 테마 샘플 이미지 등)
