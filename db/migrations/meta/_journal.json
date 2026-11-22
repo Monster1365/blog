@@ -43,6 +43,13 @@
       "when": 1794839251264,
       "tag": "0005_flaky_ser_duncan",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1795390803962,
+      "tag": "0006_yummy_living_tribunal",
+      "breakpoints": true
     }
   ]
 }

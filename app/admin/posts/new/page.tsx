@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import AdminLoading from "@/components/admin/AdminLoading";
 import PostForm from "@/components/admin/PostForm";
 import { requireAdmin } from "@/lib/auth";
+import { flattenSections, listSectionsForAdmin } from "@/lib/sections";
 
 export const metadata: Metadata = { title: "새 글" };
 
@@ -16,10 +17,11 @@ export default function NewPostPage() {
 
 async function NewPost() {
   await requireAdmin();
+  const tree = await listSectionsForAdmin();
   return (
     <section className="admin-narrow">
       <h2 className="admin-title">새 글</h2>
-      <PostForm />
+      <PostForm sections={flattenSections(tree.sections)} />
     </section>
   );
 }

@@ -10,6 +10,7 @@ export type AdminPostRow = {
   slug: string;
   title: string;
   tags: string[];
+  sectionId: number | null;
   published: boolean;
   publishedAt: Date | null;
   updatedAt: Date;
@@ -29,6 +30,7 @@ export async function listPostsForAdmin(tag?: string): Promise<AdminPostRow[]> {
       slug: posts.slug,
       title: posts.title,
       tags: posts.tags,
+      sectionId: posts.sectionId,
       published: posts.published,
       publishedAt: posts.publishedAt,
       updatedAt: posts.updatedAt,

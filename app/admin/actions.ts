@@ -1,11 +1,11 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { asc, desc, eq, isNull, max, sql } from "drizzle-orm";
 import { refresh, updateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { db } from "@/db";
-import { comments, posts, siteSettings } from "@/db/schema";
+import { comments, posts, sections, siteSettings } from "@/db/schema";
 import { getPostForAdmin, isSlugTaken, postsWithTag } from "@/lib/admin";
 import { SESSION_COOKIE, requireAdmin } from "@/lib/auth";
 import { makeExcerpt, parseTags, slugify } from "@/lib/format";
@@ -13,6 +13,7 @@ import { toTextAlign } from "@/lib/align";
 import { IMAGE_LIMITS, saveImage } from "@/lib/images";
 import { renderMarkdown } from "@/lib/markdown";
 import { POSTS_TAG, postTag } from "@/lib/posts";
+import { descendantIds, findSection, listSectionsForAdmin } from "@/lib/sections";
 import { SETTINGS_TAG } from "@/lib/settings";
 
 /** 공개 페이지 캐시를 비워 바뀐 내용이 바로 보이게 합니다. */
@@ -27,7 +28,7 @@ const RESERVED_SLUGS = new Set([
 const SLUG_RE = /^[\p{L}\p{N}]+(?:-[\p{L}\p{N}]+)*$/u;
 const IMAGE_RE = /^(?:[\w.-]+|\/[\w./-]+)$/;
 
-type Field = "title" | "slug" | "tags" | "excerpt" | "featuredImg" | "content";
+type Field = "title" | "slug" | "tags" | "excerpt" | "featuredImg" | "content" | "sectionId";
 
 export type PostFormState = {
   status: "idle" | "error";
@@ -56,6 +57,7 @@ export async function savePost(_prev: PostFormState, formData: FormData): Promis
   const featuredImg = get("featuredImg").trim();
   const published = get("published") === "on";
   const textAlign = toTextAlign(get("textAlign"));
+  const sectionId = Number(get("sectionId")) || null;
 
   const fieldErrors: PostFormState["fieldErrors"] = {};
   if (!title) fieldErrors.title = "제목을 입력해 주세요.";
@@ -75,6 +77,7 @@ export async function savePost(_prev: PostFormState, formData: FormData): Promis
     fieldErrors.featuredImg = "이미지 이름(예: sleek) 또는 /로 시작하는 경로를 입력해 주세요.";
   }
   if (!content) fieldErrors.content = "본문을 입력해 주세요.";
+  if (sectionId && !(await sectionExists(sectionId))) fieldErrors.sectionId = "없는 섹션입니다.";
 
   if (!fieldErrors.slug && slug && (await isSlugTaken(slug, id))) {
     fieldErrors.slug = "이미 다른 글이 쓰는 주소입니다.";
@@ -87,6 +90,7 @@ export async function savePost(_prev: PostFormState, formData: FormData): Promis
     excerpt: get("excerpt"),
     featuredImg: get("featuredImg"),
     content: get("content"),
+    sectionId: get("sectionId"),
     published,
     textAlign,
   };
@@ -110,6 +114,7 @@ export async function savePost(_prev: PostFormState, formData: FormData): Promis
     featuredImg: featuredImg || null,
     published,
     textAlign,
+    sectionId,
   };
 
   if (id) {
@@ -121,13 +126,20 @@ export async function savePost(_prev: PostFormState, formData: FormData): Promis
       .update(posts)
       .set({
         ...values,
+        // 섹션을 옮기면 새 섹션의 맨 끝에 둡니다.
+        sectionOrder:
+          existing.sectionId === sectionId ? existing.sectionOrder : await nextPostOrder(sectionId),
         // 처음 공개할 때 발행일을 정합니다. 이미 있으면 그대로 둡니다.
         publishedAt: published && !existing.publishedAt ? new Date() : existing.publishedAt,
       })
       .where(eq(posts.id, id));
     refreshPublic(existing.slug, slug);
   } else {
-    await db.insert(posts).values({ ...values, publishedAt: published ? new Date() : null });
+    await db.insert(posts).values({
+      ...values,
+      sectionOrder: await nextPostOrder(sectionId),
+      publishedAt: published ? new Date() : null,
+    });
     refreshPublic(slug);
   }
 
@@ -319,4 +331,156 @@ export async function saveSettings(
 
   updateTag(SETTINGS_TAG);
   return { status: "success", message: "저장했습니다. 사이트에 바로 반영됩니다.", values, nonce: Date.now() };
+}
+
+// ─── 섹션 ───────────────────────────────────────────────
+
+const sectionParent = (parentId: number | null) =>
+  parentId == null ? isNull(sections.parentId) : eq(sections.parentId, parentId);
+const postSection = (sectionId: number | null) =>
+  sectionId == null ? isNull(posts.sectionId) : eq(posts.sectionId, sectionId);
+
+async function sectionExists(id: number): Promise<boolean> {
+  const [row] = await db.select({ id: sections.id }).from(sections).where(eq(sections.id, id)).limit(1);
+  return Boolean(row);
+}
+
+/** 같은 부모 안 마지막 순서 + 1 */
+async function nextSectionOrder(parentId: number | null): Promise<number> {
+  const [row] = await db.select({ n: max(sections.sortOrder) }).from(sections).where(sectionParent(parentId));
+  return (row?.n ?? -1) + 1;
+}
+
+/** 섹션 안 마지막 글 순서 + 1 */
+async function nextPostOrder(sectionId: number | null): Promise<number> {
+  const [row] = await db.select({ n: max(posts.sectionOrder) }).from(posts).where(postSection(sectionId));
+  return (row?.n ?? -1) + 1;
+}
+
+function sectionName(formData: FormData): string | null {
+  const name = String(formData.get("name") ?? "").trim().replace(/\s+/g, " ");
+  return name && name.length <= 40 ? name : null;
+}
+
+function parentFrom(formData: FormData): number | null {
+  const id = Number(formData.get("parentId"));
+  return Number.isInteger(id) && id > 0 ? id : null;
+}
+
+/** 목록에서 한 칸 위(-1)·아래(+1)로 옮긴 새 순서 (끝이면 null) */
+function moved<T extends { id: number }>(list: T[], id: number, dir: number): T[] | null {
+  const i = list.findIndex((item) => item.id === id);
+  const j = i + dir;
+  if (i === -1 || j < 0 || j >= list.length) return null;
+  const next = [...list];
+  [next[i], next[j]] = [next[j], next[i]];
+  return next;
+}
+
+const directionFrom = (formData: FormData) => (formData.get("dir") === "up" ? -1 : 1);
+
+/** 섹션 만들기 */
+export async function createSection(formData: FormData) {
+  await requireAdmin();
+  const name = sectionName(formData);
+  if (!name) return;
+  const parentId = parentFrom(formData);
+  if (parentId && !(await sectionExists(parentId))) return;
+
+  await db.insert(sections).values({ name, parentId, sortOrder: await nextSectionOrder(parentId) });
+  refreshPublic();
+}
+
+/** 섹션 이름 바꾸기 */
+export async function renameSection(formData: FormData) {
+  await requireAdmin();
+  const name = sectionName(formData);
+  if (!name) return;
+  await db.update(sections).set({ name }).where(eq(sections.id, idFrom(formData)));
+  refreshPublic();
+}
+
+/** 상위 섹션 바꾸기 (자기 자신이나 하위 섹션 아래로는 옮길 수 없습니다) */
+export async function moveSection(formData: FormData) {
+  await requireAdmin();
+  const id = idFrom(formData);
+  const parentId = parentFrom(formData);
+
+  const tree = await listSectionsForAdmin();
+  const node = findSection(tree.sections, id);
+  if (!node || node.parentId === parentId) return;
+  if (parentId && (descendantIds(node).includes(parentId) || !findSection(tree.sections, parentId))) return;
+
+  await db
+    .update(sections)
+    .set({ parentId, sortOrder: await nextSectionOrder(parentId) })
+    .where(eq(sections.id, id));
+  refreshPublic();
+}
+
+/** 같은 상위 섹션 안에서 순서 바꾸기 */
+export async function reorderSection(formData: FormData) {
+  await requireAdmin();
+  const id = idFrom(formData);
+  const [target] = await db.select({ parentId: sections.parentId }).from(sections).where(eq(sections.id, id));
+  if (!target) return;
+
+  const siblings = await db
+    .select({ id: sections.id })
+    .from(sections)
+    .where(sectionParent(target.parentId))
+    .orderBy(asc(sections.sortOrder), asc(sections.id));
+  const next = moved(siblings, id, directionFrom(formData));
+  if (!next) return;
+
+  for (const [i, s] of next.entries()) {
+    await db.update(sections).set({ sortOrder: i }).where(eq(sections.id, s.id));
+  }
+  refreshPublic();
+}
+
+/** 섹션 삭제: 하위 섹션과 글은 상위 섹션으로 옮깁니다 (최상위면 글은 미분류). */
+export async function deleteSection(formData: FormData) {
+  await requireAdmin();
+  const id = idFrom(formData);
+  const [target] = await db.select({ parentId: sections.parentId }).from(sections).where(eq(sections.id, id));
+  if (!target) return;
+  const parentId = target.parentId;
+
+  // 옮겨 가는 섹션·글은 상위의 기존 항목 뒤에 원래 순서대로 붙입니다.
+  const sectionBase = await nextSectionOrder(parentId);
+  await db
+    .update(sections)
+    .set({ parentId, sortOrder: sql`${sections.sortOrder} + ${sectionBase}` })
+    .where(eq(sections.parentId, id));
+
+  const postBase = await nextPostOrder(parentId);
+  await db
+    .update(posts)
+    .set({ sectionId: parentId, sectionOrder: sql`${posts.sectionOrder} + ${postBase}` })
+    .where(eq(posts.sectionId, id));
+
+  await db.delete(sections).where(eq(sections.id, id));
+  refreshPublic();
+}
+
+/** 섹션 안에서 글 순서 바꾸기 */
+export async function reorderPostInSection(formData: FormData) {
+  await requireAdmin();
+  const id = idFrom(formData);
+  const post = await getPostForAdmin(id);
+  if (!post) return;
+
+  const siblings = await db
+    .select({ id: posts.id })
+    .from(posts)
+    .where(postSection(post.sectionId))
+    .orderBy(asc(posts.sectionOrder), desc(posts.publishedAt), desc(posts.id));
+  const next = moved(siblings, id, directionFrom(formData));
+  if (!next) return;
+
+  for (const [i, p] of next.entries()) {
+    await db.update(posts).set({ sectionOrder: i }).where(eq(posts.id, p.id));
+  }
+  refreshPublic();
 }

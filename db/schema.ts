@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  type AnyPgColumn,
   boolean,
   customType,
   index,
@@ -10,6 +11,27 @@ import {
   timestamp,
   unique,
 } from "drizzle-orm/pg-core";
+
+/**
+ * 섹션: 글을 폴더처럼 범주로 묶습니다 (태그와 별개). 섹션 안에 하위 섹션을 둘 수 있습니다.
+ * 같은 부모 안에서는 sort_order 순으로 보여 줍니다.
+ */
+export const sections = pgTable(
+  "sections",
+  {
+    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    name: text().notNull(),
+    /** 상위 섹션 (null이면 최상위) */
+    parentId: integer("parent_id").references((): AnyPgColumn => sections.id, { onDelete: "set null" }),
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [index("sections_parent_order_idx").on(t.parentId, t.sortOrder)],
+);
+
+export type Section = typeof sections.$inferSelect;
 
 export const posts = pgTable(
   "posts",
@@ -30,6 +52,10 @@ export const posts = pgTable(
     published: boolean().notNull().default(false),
     /** 본문 정렬: left | center | right | justify */
     textAlign: text("text_align").notNull().default("left"),
+    /** 들어 있는 섹션 (null이면 미분류) */
+    sectionId: integer("section_id").references(() => sections.id, { onDelete: "set null" }),
+    /** 섹션 안에서의 순서 */
+    sectionOrder: integer("section_order").notNull().default(0),
     publishedAt: timestamp("published_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
@@ -42,6 +68,7 @@ export const posts = pgTable(
   (t) => [
     index("posts_published_at_idx").on(t.published, t.publishedAt.desc()),
     index("posts_categories_idx").using("gin", t.tags),
+    index("posts_section_order_idx").on(t.sectionId, t.sectionOrder),
   ],
 );
 

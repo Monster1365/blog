@@ -8,6 +8,7 @@ const links = [
   { href: "/admin", label: "대시보드" },
   { href: "/admin/posts", label: "글" },
   { href: "/admin/posts/new", label: "새 글" },
+  { href: "/admin/sections", label: "섹션" },
   { href: "/admin/tags", label: "태그" },
   { href: "/admin/comments", label: "댓글" },
   { href: "/admin/settings", label: "사이트 설정" },

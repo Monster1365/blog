@@ -8,6 +8,7 @@ import ConfirmButton from "@/components/admin/ConfirmButton";
 import PostForm from "@/components/admin/PostForm";
 import { getPostForAdmin } from "@/lib/admin";
 import { requireAdmin } from "@/lib/auth";
+import { flattenSections, listSectionsForAdmin } from "@/lib/sections";
 
 export const metadata: Metadata = { title: "글 수정" };
 
@@ -24,7 +25,7 @@ async function EditPost({ params }: Pick<PageProps<"/admin/posts/[id]/edit">, "p
   const id = Number((await params).id);
   if (!Number.isInteger(id) || id <= 0) notFound();
 
-  const post = await getPostForAdmin(id);
+  const [post, tree] = await Promise.all([getPostForAdmin(id), listSectionsForAdmin()]);
   if (!post) notFound();
 
   return (
@@ -48,6 +49,7 @@ async function EditPost({ params }: Pick<PageProps<"/admin/posts/[id]/edit">, "p
         </div>
       </div>
       <PostForm
+        sections={flattenSections(tree.sections)}
         post={{
           id: post.id,
           title: post.title,
@@ -58,6 +60,7 @@ async function EditPost({ params }: Pick<PageProps<"/admin/posts/[id]/edit">, "p
           content: post.content,
           published: post.published,
           textAlign: post.textAlign,
+          sectionId: post.sectionId,
         }}
       />
     </section>

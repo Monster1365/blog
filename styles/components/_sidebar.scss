@@ -1,0 +1,189 @@
+@use "../abstracts" as *;
+
+// 홈 왼쪽 글 목록 (최근 글 + 섹션)
+.home-layout {
+  @include breakpoint($lg) {
+    display: grid;
+    grid-template-columns: 15rem minmax(0, 1fr);
+    gap: 2.5rem;
+    align-items: start;
+  }
+}
+
+.post-sidebar {
+  padding-top: 2.5em;
+
+  @include breakpoint($md) {
+    padding-top: 3em;
+  }
+
+  @include breakpoint($lg) {
+    position: sticky;
+    top: 0;
+    max-height: 100vh;
+    overflow-y: auto;
+    padding-top: 5em;
+    padding-bottom: 2rem;
+  }
+
+  // 휴대폰·태블릿에서는 카드 목록 바로 위에 붙습니다.
+  + .post-list {
+    @include breakpoint($xs) {
+      padding-top: 1.5rem;
+    }
+
+    @include breakpoint($lg) {
+      padding-top: 5em;
+    }
+  }
+}
+
+.post-sidebar__inner {
+  font-size: 0.9375rem;
+}
+
+.post-sidebar__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font: inherit;
+  font-weight: 700;
+  color: $heading-color;
+  background-color: $bg-color;
+  border: 1px solid $border;
+  border-radius: 4px;
+  cursor: pointer;
+
+  svg {
+    transition: transform 0.2s ease;
+  }
+
+  .--open > & {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+
+    svg {
+      transform: rotate(180deg);
+    }
+  }
+
+  @include breakpoint($lg) {
+    display: none;
+  }
+}
+
+.post-sidebar__body {
+  display: none;
+  padding: 1rem;
+  background-color: $bg-color;
+  border: 1px solid $border;
+  border-top: 0;
+  border-radius: 0 0 4px 4px;
+
+  .--open > & {
+    display: block;
+  }
+
+  @include breakpoint($lg) {
+    display: block;
+    padding: 0;
+    background: none;
+    border: 0;
+  }
+}
+
+.post-sidebar__group + .post-sidebar__group {
+  margin-top: 1.75rem;
+}
+
+.post-sidebar__heading {
+  margin: 0 0 0.5rem;
+  padding-bottom: 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: $grey;
+  border-bottom: 1px solid $border;
+}
+
+.post-sidebar__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    margin: 0;
+  }
+
+  &.--nested {
+    margin-left: 0.4rem;
+    padding-left: 0.75rem;
+    border-left: 1px solid $border;
+  }
+}
+
+.post-sidebar__post {
+  display: block;
+  padding: 0.3rem 0;
+  line-height: 1.4;
+  color: $text-color;
+  border-bottom: 0;
+  overflow-wrap: anywhere;
+
+  &:hover,
+  &:focus {
+    color: $primary;
+    border-bottom: 0;
+  }
+}
+
+.post-sidebar__folder > summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0;
+  font-weight: 700;
+  color: $heading-color;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+
+  &::-webkit-details-marker {
+    display: none;
+  }
+
+  &:hover {
+    color: $primary;
+  }
+}
+
+.post-sidebar__chevron {
+  flex-shrink: 0;
+  color: $grey;
+  transition: transform 0.15s ease;
+
+  [open] > summary > & {
+    transform: rotate(90deg);
+  }
+}
+
+.post-sidebar__name {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.post-sidebar__count {
+  flex-shrink: 0;
+  min-width: 1.5rem;
+  padding: 0 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 400;
+  text-align: center;
+  color: $grey;
+  background-color: $light-bg-color;
+  border: 1px solid $border;
+  border-radius: 100px;
+}

@@ -8,6 +8,7 @@ import SubmitButton from "@/components/admin/SubmitButton";
 import { listPostsForAdmin, listTagsForAdmin } from "@/lib/admin";
 import { requireAdmin } from "@/lib/auth";
 import { formatDate } from "@/lib/format";
+import { flattenSections, listSectionsForAdmin } from "@/lib/sections";
 
 export const metadata: Metadata = { title: "글" };
 
@@ -24,7 +25,12 @@ async function AdminPosts({ searchParams }: Pick<PageProps<"/admin/posts">, "sea
   const { tag } = await searchParams;
   const selectedTag = typeof tag === "string" && tag ? tag : undefined;
 
-  const [posts, tags] = await Promise.all([listPostsForAdmin(selectedTag), listTagsForAdmin()]);
+  const [posts, tags, tree] = await Promise.all([
+    listPostsForAdmin(selectedTag),
+    listTagsForAdmin(),
+    listSectionsForAdmin(),
+  ]);
+  const sectionLabel = new Map(flattenSections(tree.sections).map((s) => [s.id, s.label]));
 
   return (
     <section>
@@ -61,6 +67,7 @@ async function AdminPosts({ searchParams }: Pick<PageProps<"/admin/posts">, "sea
               <tr>
                 <th>제목</th>
                 <th>상태</th>
+                <th>섹션</th>
                 <th>태그</th>
                 <th>발행일</th>
                 <th>댓글</th>
@@ -80,6 +87,9 @@ async function AdminPosts({ searchParams }: Pick<PageProps<"/admin/posts">, "sea
                     <span className={`admin-badge${post.published ? " --public" : ""}`}>
                       {post.published ? "공개" : "숨김"}
                     </span>
+                  </td>
+                  <td className="admin-table__tags">
+                    {(post.sectionId && sectionLabel.get(post.sectionId)) || "—"}
                   </td>
                   <td className="admin-table__tags">{post.tags.join(", ") || "—"}</td>
                   <td>{post.publishedAt ? formatDate(post.publishedAt.toISOString()) : "—"}</td>

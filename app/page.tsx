@@ -1,10 +1,12 @@
 import { Hero } from "@/components/Hero";
 import PostCard from "@/components/PostCard";
+import PostSidebar from "@/components/PostSidebar";
 import { getPublishedPosts } from "@/lib/posts";
+import { getSectionTree } from "@/lib/sections";
 import { getSiteSettings } from "@/lib/settings";
 
 export default async function HomePage() {
-  const [posts, s] = await Promise.all([getPublishedPosts(), getSiteSettings()]);
+  const [posts, tree, s] = await Promise.all([getPublishedPosts(), getSectionTree(), getSiteSettings()]);
 
   return (
     <>
@@ -15,7 +17,8 @@ export default async function HomePage() {
 
       <main className="site__content">
         <section className="blog">
-          <div className="container">
+          <div className="container home-layout">
+            <PostSidebar posts={posts} tree={tree} />
             <div className="post-list">
               {posts.length > 0 ? (
                 posts.map((post, i) => (

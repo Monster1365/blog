@@ -7,6 +7,9 @@ import MarkdownEditor from "@/components/admin/MarkdownEditor";
 import { TEXT_ALIGNS, type TextAlign, alignClass, toTextAlign } from "@/lib/align";
 import { type FrontMatter, frontMatterList, frontMatterString } from "@/lib/frontmatter";
 
+/** 섹션 선택 목록 (lib/sections의 flattenSections 결과) */
+export type SectionChoice = { id: number; label: string; depth: number };
+
 export type PostFormValues = {
   id?: number;
   title: string;
@@ -17,11 +20,18 @@ export type PostFormValues = {
   content: string;
   published: boolean;
   textAlign?: string;
+  sectionId?: number | null;
 };
 
 const initialState: PostFormState = { status: "idle" };
 
-export default function PostForm({ post }: { post?: PostFormValues }) {
+export default function PostForm({
+  post,
+  sections = [],
+}: {
+  post?: PostFormValues;
+  sections?: SectionChoice[];
+}) {
   const [state, formAction, pending] = useActionState(savePost, initialState);
 
   // 오류로 돌아왔으면 방금 입력한 값, 아니면 저장된 값
@@ -34,6 +44,7 @@ export default function PostForm({ post }: { post?: PostFormValues }) {
     content: post?.content ?? "",
     published: post?.published ?? true,
     textAlign: toTextAlign(post?.textAlign),
+    sectionId: post?.sectionId ? String(post.sectionId) : "",
   };
 
   return (
@@ -42,6 +53,7 @@ export default function PostForm({ post }: { post?: PostFormValues }) {
       key={state.nonce ?? "initial"}
       v={v}
       postId={post?.id}
+      sections={sections}
       errors={state.fieldErrors ?? {}}
       message={state.message}
       formAction={formAction}
@@ -53,6 +65,7 @@ export default function PostForm({ post }: { post?: PostFormValues }) {
 function PostFormBody({
   v,
   postId,
+  sections,
   errors,
   message,
   formAction,
@@ -60,6 +73,7 @@ function PostFormBody({
 }: {
   v: NonNullable<PostFormState["values"]>;
   postId?: number;
+  sections: SectionChoice[];
   errors: NonNullable<PostFormState["fieldErrors"]>;
   message?: string;
   formAction: (formData: FormData) => void;
@@ -108,6 +122,22 @@ function PostFormBody({
           <input ref={tagsRef} id="tags" name="tags" defaultValue={v.tags} />
         </Field>
       </div>
+
+      <Field
+        id="sectionId"
+        label="섹션"
+        hint="글을 폴더처럼 넣어 둘 곳입니다. 섹션은 관리 > 섹션에서 만듭니다."
+        error={errors.sectionId}
+      >
+        <select id="sectionId" name="sectionId" defaultValue={v.sectionId}>
+          <option value="">없음 (미분류)</option>
+          {sections.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.label}
+            </option>
+          ))}
+        </select>
+      </Field>
 
       <div className="admin-form__row">
         <ImageField
