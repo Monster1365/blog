@@ -1,13 +1,13 @@
 @use "../abstracts" as *;
 
 // 홈 왼쪽 글 목록 (최근 글 + 섹션)
-.home-layout {
-  @include breakpoint($lg) {
-    display: grid;
-    grid-template-columns: 15rem minmax(0, 1fr);
-    gap: 2.5rem;
-    align-items: start;
-  }
+// 넓은 화면(xl 이상): 화면 왼쪽 끝에 조금 띄워 붙이고, 카드 목록은 원래처럼 가운데에 둡니다.
+// 좁은 화면: 카드 목록 위에 "글 목록" 버튼으로 접어 둡니다.
+$sidebar-width: 14rem;
+$sidebar-gap: 1.25rem;
+
+.blog {
+  position: relative;
 }
 
 .post-sidebar {
@@ -17,29 +17,44 @@
     padding-top: 3em;
   }
 
-  @include breakpoint($lg) {
-    position: sticky;
+  @include breakpoint($xl) {
+    position: absolute;
     top: 0;
-    max-height: 100vh;
-    overflow-y: auto;
-    padding-top: 5em;
-    padding-bottom: 2rem;
+    bottom: 0;
+    left: $sidebar-gap;
+    width: $sidebar-width;
+    max-width: none;
+    margin: 0;
+    padding: 0;
   }
 
   // 휴대폰·태블릿에서는 카드 목록 바로 위에 붙습니다.
-  + .post-list {
-    @include breakpoint($xs) {
-      padding-top: 1.5rem;
-    }
+  + .home-layout .post-list {
+    padding-top: 1.5rem;
 
-    @include breakpoint($lg) {
+    @include breakpoint($xl) {
       padding-top: 5em;
     }
   }
 }
 
+// 카드 목록은 가운데에 두되, 왼쪽 목록과 겹치지 않을 만큼만 좌우를 똑같이 줄입니다.
+.home-layout {
+  @include breakpoint($xl) {
+    max-width: min(1170px, calc(100vw - 2 * (#{$sidebar-width} + #{$sidebar-gap} * 2)));
+  }
+}
+
 .post-sidebar__inner {
   font-size: 0.9375rem;
+
+  @include breakpoint($xl) {
+    position: sticky;
+    top: 0;
+    max-height: 100vh;
+    overflow-y: auto;
+    padding: 5em 0 2rem;
+  }
 }
 
 .post-sidebar__toggle {
@@ -69,7 +84,7 @@
     }
   }
 
-  @include breakpoint($lg) {
+  @include breakpoint($xl) {
     display: none;
   }
 }
@@ -86,7 +101,7 @@
     display: block;
   }
 
-  @include breakpoint($lg) {
+  @include breakpoint($xl) {
     display: block;
     padding: 0;
     background: none;
@@ -186,4 +201,17 @@
   background-color: $light-bg-color;
   border: 1px solid $border;
   border-radius: 100px;
+}
+
+// 왼쪽 목록 때문에 카드 목록이 좁아지는 구간(1200~1400px)은 3열 대신 2열로 둡니다.
+@media only screen and (min-width: $xl) and (max-width: 87.49em) {
+  .home-layout .post-card {
+    width: 48.4375%;
+    margin-right: 3.125%;
+
+    &:nth-child(2n+2),
+    &:last-of-type {
+      margin-right: 0;
+    }
+  }
 }

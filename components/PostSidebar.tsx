@@ -12,7 +12,7 @@ export default function PostSidebar({ posts, tree }: { posts: PostSummary[]; tre
   const hasSections = tree.sections.length > 0;
 
   return (
-    <aside className="post-sidebar" aria-label="글 목록">
+    <aside className="post-sidebar container" aria-label="글 목록">
       <SidebarToggle>
         <section className="post-sidebar__group">
           <h2 className="post-sidebar__heading">최근 글</h2>

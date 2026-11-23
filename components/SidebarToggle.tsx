@@ -4,7 +4,7 @@ import { type ReactNode, useState } from "react";
 
 /**
  * 좁은 화면에서 "글 목록" 버튼으로 사이드바를 열고 닫습니다.
- * 넓은 화면(lg 이상)에서는 CSS로 버튼을 숨기고 내용을 항상 보여 줍니다.
+ * 넓은 화면(xl 이상)에서는 CSS로 버튼을 숨기고 내용을 항상 보여 줍니다.
  */
 export default function SidebarToggle({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);

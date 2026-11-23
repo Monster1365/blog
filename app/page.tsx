@@ -17,8 +17,8 @@ export default async function HomePage() {
 
       <main className="site__content">
         <section className="blog">
+          <PostSidebar posts={posts} tree={tree} />
           <div className="container home-layout">
-            <PostSidebar posts={posts} tree={tree} />
             <div className="post-list">
               {posts.length > 0 ? (
                 posts.map((post, i) => (
